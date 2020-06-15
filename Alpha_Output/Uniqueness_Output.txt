@@ -1,0 +1,8 @@
+----read string is --  in 0th file
+File processed is Result_2_10000.txt total count till now is 10000
+----read string is --  in 1th file
+File processed is Result_10000.txt total count till now is 20000
+----read string is --  in 2th file
+File processed is Result_1000000.txt total count till now is 1020000
+
+--All are unique--
