@@ -12,3 +12,5 @@ Currently, I have kept algo as --secret--. Along with that, version Alpha's outp
 Techies, money-holders & investors or buyers can contact me on vivek.funeesh@gmail.com, if they find Alpha output interesting.
 
 Future 1st final version will be 50% modified version with more randomness and amount of IDs that can be generated.
+
+<b> Before_Insight.txt conatins some of the difficulties I faced and experience I gained while understanding time & randomness.</b>
