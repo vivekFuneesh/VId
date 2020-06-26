@@ -1,0 +1,7 @@
+----read string is --  in 0th file
+----read string is --  in 0th file
+----read string is --  in 0th file
+----read string is --  in 0th file
+File processed is Result_MIX_100.txt total count till now is 201
+
+--All are Unique--
