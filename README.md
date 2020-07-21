@@ -1,6 +1,8 @@
 # VId
 Unique, Random Id Generator.
 
+Video Introduction:: https://youtu.be/Yq3mhSRk5Rk 
+
 An ID generator that can generate unique and Random Ids.
 
 No need to track already generated IDs.
@@ -13,7 +15,7 @@ Currently, I have kept algo as --secret--. Along with that, version Alpha's outp
 
 Future 1st final version will be 50% modified version with more randomness and amount of IDs that can be generated.
 
-<b> Before_Insight.txt conatins some of the difficulties I faced and experience I gained while understanding time & randomness.</b>
+<b> Before_Insight.txt contains some of the difficulties I faced and experience I gained while understanding time & randomness.</b>
 
 <b>EDIT 1::</b> Final Alpha Output has been attached which has astonishing results. Randomness has been increased too much.
 
