@@ -1,7 +1,7 @@
 # VId
 Unique, Random Id Generator.
 
-Abstract:
+#Abstract:
 
 Technique to generate random IDs which are 100% unique(collision free) irrespective of the hardware used(i.e. hardware with slow or fast performance doesn't matter).
 
@@ -18,7 +18,7 @@ This "trackless & storage less uniqueness" is specific to the state of algorithm
 
 Combined with MAC address of NIC by IEEE these are UUID. 
 
-Combined with node-bits/instance-bits on a particular server, these are uniques across all instances in a server and in world of MAC.
+Combined with node-bits/instance-bits on a particular server, these are unique across all instances in a server and in world of MAC.
 
 
 -------------------
