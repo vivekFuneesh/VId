@@ -20,6 +20,8 @@ Combined with MAC address of NIC by IEEE these are UUID.
 
 Combined with node-bits/instance-bits on a particular server, these are unique across all instances in a server and in world of MAC.
 
+Number/Frequency of state-updations is also extremely less and is -->0 with certain switches & gears (choices, options) selected by user.
+
 Flexibilities:-
 
 This dependency on dynamic-state-of-algorithm can be removed using appropriate switches & gears but then it would be called as minimal basic implementation because current final-minimal-version is supporting 80+ variations of this VId and this minimal-basic is not coded for this boring switch-gear combination as it's not much scalable for high performance machines.
