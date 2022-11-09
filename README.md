@@ -1,5 +1,5 @@
 # VId
-Unique, Random Id Generator.
+100% Unique, Random, Trackingless, Storageless Id Generator.
 
 <H2>Abstract:</H2>
 
@@ -41,9 +41,6 @@ No need to track already generated IDs.
 
 Even if system fails, upon restart it will give unique random IDs again.
 
-Currently, I have kept algo as --secret--. <br>
 Along with that, version Alpha's output of the year 2020 is being put inside a Alpha* folder.
-
-<b>Techies, non-techies can contact me on vivek.funeesh@gmail.com, if they find output-results interesting.</b>
 
 
