@@ -1,3 +1,29 @@
+
+    VVId (VId), Vivek's Id or Vivek's virtual Id is a technique  or algorithm to generate 
+    unique, random, trackless & storageless(no storage is required to keep track of them) IDs (strings, numbers, symbols etc.).
+                  Copyright (C) 2020  Vivek Mangla
+    
+    Tutorials at https://youtube.com/playlist?list=PLxxkGs1eKWxQFtCn8QNpNkCrnHKXvl8bm 
+    Video tutorials under creative commons licence:- https://creativecommons.org/ 
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+    To connect with author, possible way to reach is via email 
+    vivek.funeesh@gmail.com 
+
+
+=================
 # VId
 100% Unique, Random, Trackingless, Storageless Id Generator.
 
@@ -13,7 +39,11 @@ Instance on which application deployed, <br>
 
 ------------------
 Notes:-
- 
+
+Video Introduction:: https://youtu.be/Yq3mhSRk5Rk 
+
+Video Tutorials at https://youtube.com/playlist?list=PLxxkGs1eKWxQFtCn8QNpNkCrnHKXvl8bm 
+
 This "trackless & storage less uniqueness" is specific to the state of algorithm/mathematics-steps used.
 
 Combined with MAC address of NIC by IEEE these are UUID. 
@@ -28,19 +58,9 @@ This dependency on dynamic-state-of-algorithm can be removed using appropriate s
 
 Any number of symbols can be used, yes that's also possible without any collision and tracking other that the dynamic-updation-of-state.
 
-Other stuffs too.
+Other stuffs too... mentioned in video tutorials
 
 -------------------
 
-
-Video Introduction:: https://youtu.be/Yq3mhSRk5Rk 
-
-An ID generator that can generate unique and Random Ids.
-
-No need to track already generated IDs.
-
-Even if system fails, upon restart it will give unique random IDs again.
-
-Along with that, version Alpha's output of the year 2020 is being put inside a Alpha* folder.
-
+Version Alpha's output of the year 2020 is being put inside Alpha* folder.
 
