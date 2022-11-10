@@ -40,9 +40,15 @@ Instance on which application deployed, <br>
 ------------------
 Notes:-
 
+This is a sample code:- Scholars/researchers can use this as a core reference. It has all possible extension open-sockets, means that if anyone wants to complete extensions, complex-level-1 and complex-level2 then design has already sockets open.
+
+To optimize code for usability-requirements of merely few years, use long instead of BigInteger. 
+
 Video Introduction:: https://youtu.be/Yq3mhSRk5Rk 
 
-Video Tutorials at https://youtube.com/playlist?list=PLxxkGs1eKWxQFtCn8QNpNkCrnHKXvl8bm 
+Video Tutorials (language - local hindi with english mix) at https://youtube.com/playlist?list=PLxxkGs1eKWxQFtCn8QNpNkCrnHKXvl8bm 
+
+To convert tutorials into pdf, use speech-to-text engine available by various vendors.
 
 This "trackless & storage less uniqueness" is specific to the state of algorithm/mathematics-steps used.
 
