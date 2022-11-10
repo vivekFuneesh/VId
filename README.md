@@ -38,17 +38,19 @@ Instance on which application deployed, <br>
 --> else a new dynamic state will be generated and processed.<br>
 
 ------------------
-Notes:-
+<H2>Notes:-</H2>
 
-This is a sample code:- Scholars/researchers can use this as a core reference. It has all possible extension open-sockets, means that if anyone wants to complete extensions, complex-level-1 and complex-level2 then design has already sockets open.
+<H3>This is a sample code:-</H3> Scholars/researchers can use this as a core reference. It has all possible extensible open-sockets, means that if anyone wants to complete extensions, complex-level-1 and complex-level2 then code-design has already sockets open to do that.
 
 To optimize code for usability-requirements of merely few years, use long instead of BigInteger. 
 
-Video Introduction:: https://youtu.be/Yq3mhSRk5Rk 
+<a href="https://youtu.be/Yq3mhSRk5Rk ">Video Introduction Over Here</a> 
 
-Video Tutorials (language - local hindi with english mix) at https://youtube.com/playlist?list=PLxxkGs1eKWxQFtCn8QNpNkCrnHKXvl8bm 
+<a href="https://youtube.com/playlist?list=PLxxkGs1eKWxQFtCn8QNpNkCrnHKXvl8bm">Video Tutorials (language - local hindi with english mix) here</a>
 
 To convert tutorials into pdf, use speech-to-text engine available by various vendors.
+
+<H3>Other Notes</H3>
 
 This "trackless & storage less uniqueness" is specific to the state of algorithm/mathematics-steps used.
 
@@ -64,7 +66,7 @@ This dependency on dynamic-state-of-algorithm can be removed using appropriate s
 
 Any number of symbols can be used, yes that's also possible without any collision and tracking other that the dynamic-updation-of-state.
 
-Other stuffs too... mentioned in video tutorials
+Other stuffs too... mentioned in <a href="https://youtube.com/playlist?list=PLxxkGs1eKWxQFtCn8QNpNkCrnHKXvl8bm">video tutorials</a>
 
 -------------------
 
