@@ -22,8 +22,8 @@
     To connect with author, possible way to reach is via email 
     vivek.funeesh@gmail.com 
 
-
-=================
+## TO CORPORATE ARCHITECTS, ENGINEERING TEAMS, AND INDEPENDENT RE-IMPLEMENTORS: <br><a href="https://github.com/vivekFuneesh/VId/blob/master/Legal%20and%20Commercial%20Compliance%20Notice.md"> ⚠️ Legal And Commercial Compliance Notice ⚠️ </a> 
+===========================
 # VId
 100% Unique, Random, Trackingless, Storageless Id Generator.
 
