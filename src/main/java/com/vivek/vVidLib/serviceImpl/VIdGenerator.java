@@ -1,3 +1,9 @@
+/*
+*     TO CORPORATE ARCHITECTS, ENGINEERING TEAMS, AND INDEPENDENT RE-IMPLEMENTORS: <br>
+*   ⚠️Read Legal And Commercial Compliance Notice from link below⚠️ <br>
+*     https://github.com/vivekFuneesh/VId/blob/master/Legal%20and%20Commercial%20Compliance%20Notice.md
+*/
+
 /**
  * VVId (VId), Vivek's Id or Vivek's virtual Id is a technique  or algorithm to generate 
  * unique, random, trackless & storageless(no storage is required to keep track of them) IDs (strings, numbers, symbols etc.).
@@ -51,6 +57,7 @@ import com.vivek.vVidLib.models.TimerState;
 import com.vivek.vVidLib.models.VId;
 import com.vivek.vVidLib.models.VIdState;
 import com.vivek.vVidLib.repository.VIdStateRepo;
+import com.vivek.vVidLib.service.HandleBackwardClockDrift;
 import com.vivek.vVidLib.utility.VIdUtility;
 
 /**
@@ -122,6 +129,16 @@ import com.vivek.vVidLib.utility.VIdUtility;
  * 
  */
 
+ /**
+ * TODO: IMPORTANT: Check if need upgrade to exhaust complete domain at every place.. 
+ * One way is - use series of symbols instead of digits from 0 to 9..
+ * That will cover entire symbols domain. But I think that is what all generators do. 
+ * Another way is to go as usual and modify symbol mappings and length updation
+ * logic, shuffling logic, placemappings logic OR just update conditions for them to trigger
+ * i.e. instead of digits - use symbol table length to determine length increment
+ * or (check if required) both!
+ */
+
 @Component
 @RequestScope
 public class VIdGenerator {
@@ -155,7 +172,13 @@ public class VIdGenerator {
 		System.out.println("Inside checkAndLoad");
 		state = vIdStateRepo.findAll().stream().findFirst().orElse(null);
 
-		if (state != null) {
+		if (state != null) { 
+			/* TODO: 
+			* Check for clock backward drift first.
+			* HandleBackwardClockDrift();
+			*
+			*/
+			
 			System.out.println("Loading form DB--");
 			currentVId = mm.map(state, VId.class);
 			currentVId.setTimer(mm.map(state.getTimerState(), Timer.class));
@@ -231,6 +254,12 @@ public class VIdGenerator {
 	public VId getNext(VId oldVId, InitializerDto dto) {
 
 		VId currVId;
+
+		/* TODO: 
+		* Check for clock backward drift first.
+		* HandleBackwardClockDrift();
+		*
+		*/
 
 		if (oldVId == null) {
 			currVId = new VId();

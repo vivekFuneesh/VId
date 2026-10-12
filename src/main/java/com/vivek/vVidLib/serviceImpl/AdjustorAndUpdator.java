@@ -1,3 +1,9 @@
+/*
+*     TO CORPORATE ARCHITECTS, ENGINEERING TEAMS, AND INDEPENDENT RE-IMPLEMENTORS: <br>
+*   ⚠️Read Legal And Commercial Compliance Notice from link below⚠️ <br>
+*     https://github.com/vivekFuneesh/VId/blob/master/Legal%20and%20Commercial%20Compliance%20Notice.md
+*/ 
+
 /**
  * VVId (VId), Vivek's Id or Vivek's virtual Id is a technique  or algorithm to generate 
  * unique, random, trackless & storageless(no storage is required to keep track of them) IDs (strings, numbers, symbols etc.).
@@ -70,6 +76,7 @@ public class AdjustorAndUpdator {
 		Timer currTimer = currVId.getTimer();
 
 		if (oldVId.getTimer().getPrecisedValue().compareTo(currVId.getTimer().getPrecisedValue()) < 0) {
+			
 			/*
 			 * ----------1----------- reset length of sequencerBits to old, shuffle
 			 * symbol-store for sequencer and randomizer, regenerate sequencer and
@@ -114,9 +121,13 @@ public class AdjustorAndUpdator {
 				handleIncrementInTimerValueWithLengthCheck(sc, currVId, oldVId);
 
 			} else {
+				/*
+				* In this case, entire sequencer range has been exhausted for a given timer value.
+				*/
 				addInternalAndVIdMappings(oldVId.getSequencer(), currVId.getSequencer(), currVId, oldVId);
 				// both 1 and 2 except for the changes in length of sequencer in 1
 				currVId.getSequencer().setInitialNumberOfSymbols(currVId.getSequencer().getCurrentNumberOfSymbols());
+				//case when timer also increased in value simultaneously when sequencer exhausted and increased in length.
 				handleIncrementTimerValueCase(sc, currVId);
 				shuffleTimer(currVId);
 
@@ -125,6 +136,14 @@ public class AdjustorAndUpdator {
 
 	}
 
+	/*
+	* TODO: Check if entire sequencer range has not been exhausted 
+	*         then check if rectified symbol mappings is required, 
+	*              if required then pull from assembler or make here.
+	*              Save current state and old state both to DB to be retrieved later.
+	*       Ensure which symbols have been mapped to a particular place,
+	*       to properly exhaust complete domain as well.
+	*/
 	private void handleIncrementInTimerValueWithLengthCheck(ServiceCaller serviceCaller, VId currVId, VId oldVId) {
 		// System.out.println(currVId.getSequencer().getValue());
 		currVId.getSequencer().setInitialNumberOfSymbols(oldVId.getSequencer().getCurrentNumberOfSymbols());
