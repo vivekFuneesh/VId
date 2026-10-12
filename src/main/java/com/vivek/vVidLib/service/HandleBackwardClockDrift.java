@@ -34,7 +34,8 @@ public interface HandleBackwardClockDrift {
   *         Fetch from D.B./Hard-Disk the mapping of virtual time to hardware clock (to be stored
   *            and updated by either using a separate programm or in @PostConstruct of VIdGenerator).
   *         Update Virtual/system clock's precision.
-  *         Return;
+  *       Else Fetch and correct;
+  *       Return;
   *   B.) 
   *   1. throw exception
   *   2. wait untill correct time is restored in computing machine.
