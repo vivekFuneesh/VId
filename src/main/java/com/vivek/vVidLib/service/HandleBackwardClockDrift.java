@@ -1,3 +1,8 @@
+ /*
+ *     TO CORPORATE ARCHITECTS, ENGINEERING TEAMS, AND INDEPENDENT RE-IMPLEMENTORS: <br>
+ *   ⚠️Read Legal And Commercial Compliance Notice from link below⚠️ <br>
+ *     https://github.com/vivekFuneesh/VId/blob/master/Legal%20and%20Commercial%20Compliance%20Notice.md
+ */
 /**
  * VVId (VId), Vivek's Id or Vivek's virtual Id is a technique  or algorithm to generate 
  * unique, random, trackless & storageless(no storage is required to keep track of them) IDs (strings, numbers, symbols etc.).
@@ -19,6 +24,11 @@
  *     To connect with author, possible way to reach is via email 
  *     vivek.funeesh@gmail.com 
  * */
+ /*
+ *     TO CORPORATE ARCHITECTS, ENGINEERING TEAMS, AND INDEPENDENT RE-IMPLEMENTORS: <br>
+ *   ⚠️Read Legal And Commercial Compliance Notice from link below⚠️ <br>
+ *     https://github.com/vivekFuneesh/VId/blob/master/Legal%20and%20Commercial%20Compliance%20Notice.md
+ */
 
 package com.vivek.vVidLib.service;
 
