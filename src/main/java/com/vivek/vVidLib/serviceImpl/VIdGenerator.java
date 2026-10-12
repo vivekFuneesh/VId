@@ -158,11 +158,10 @@ public class VIdGenerator {
 		if (state != null) { 
 			/* TODO: 
 			* Check for clock backward drift first.
-			* If ( now() < state.getTime() ) {
-			*     HandleBackwardClockDrift();
-			* }
+			* HandleBackwardClockDrift();
 			*
 			*/
+			
 			System.out.println("Loading form DB--");
 			currentVId = mm.map(state, VId.class);
 			currentVId.setTimer(mm.map(state.getTimerState(), Timer.class));
@@ -241,9 +240,7 @@ public class VIdGenerator {
 
 		/* TODO: 
 		* Check for clock backward drift first.
-		* If ( now() < state.getTime() ) {
-		*     HandleBackwardClockDrift();
-		* }
+		* HandleBackwardClockDrift();
 		*
 		*/
 
