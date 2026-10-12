@@ -32,7 +32,7 @@ public interface HandleBackwardClockDrift {
   *   2. wait untill correct time is restored in computing machine.
   *   3. fetch correct time from external service and update comoutinh system's clock.
   *   4. untill clock is corrected, 
-  *        generate from skipped domaims and ranges, if available in DB.
+  *        generate from skipped domains and ranges, if available in DB.
   *        else if not available then choose any from above 3.
   *
   */
