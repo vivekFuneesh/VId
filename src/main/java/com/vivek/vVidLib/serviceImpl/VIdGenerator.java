@@ -155,7 +155,14 @@ public class VIdGenerator {
 		System.out.println("Inside checkAndLoad");
 		state = vIdStateRepo.findAll().stream().findFirst().orElse(null);
 
-		if (state != null) {
+		if (state != null) { 
+			/*
+			* Check for clock backward drift first.
+			* If ( now() < state.getTime() ) {
+			*     HandleBackwardClockDrift();
+			* }
+			*
+			*/
 			System.out.println("Loading form DB--");
 			currentVId = mm.map(state, VId.class);
 			currentVId.setTimer(mm.map(state.getTimerState(), Timer.class));
@@ -231,6 +238,14 @@ public class VIdGenerator {
 	public VId getNext(VId oldVId, InitializerDto dto) {
 
 		VId currVId;
+
+		/*
+		* Check for clock backward drift first.
+		* If ( now() < state.getTime() ) {
+		*     HandleBackwardClockDrift();
+		* }
+		*
+		*/
 
 		if (oldVId == null) {
 			currVId = new VId();
