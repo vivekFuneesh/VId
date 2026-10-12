@@ -128,6 +128,15 @@ import com.vivek.vVidLib.utility.VIdUtility;
  * ThreadLocalRandom.. or use multiple random.. doesn't matter.
  * 
  */
+/*
+* TODO: IMPORTANT: Check if need upgrade to exhaust complete domain at every place.. 
+* One way is - use series of symbols instead of digits from 0 to 9..
+* That will cover entire symbols domain. But I think that is what all generators do. 
+* Another way is to go as usual and modify symbol mappings and length updation
+* logic, shuffling logic, placemappings logic OR just update conditions for them to trigger
+* i.e. instead of digits - use symbol table length to determine length increment
+* or (check if required) both!
+*/
 
 @Component
 @RequestScope
