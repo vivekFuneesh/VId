@@ -138,8 +138,11 @@ public class AdjustorAndUpdator {
 
 	/*
 	* TODO: Check if entire sequencer range has not been exhausted 
-	*         then Save current state and old state both to DB to be retrieved later.
-	* 
+	*         then check if rectified symbol mappings is required, 
+	*              if required then pull from assembler or make here.
+	*              Save current state and old state both to DB to be retrieved later.
+	*       Ensure which symbols have been mapped to a particular place,
+	*       to properly exhaust complete domain as well.
 	*/
 	private void handleIncrementInTimerValueWithLengthCheck(ServiceCaller serviceCaller, VId currVId, VId oldVId) {
 		// System.out.println(currVId.getSequencer().getValue());
