@@ -156,7 +156,7 @@ public class VIdGenerator {
 		state = vIdStateRepo.findAll().stream().findFirst().orElse(null);
 
 		if (state != null) { 
-			/*
+			/* TODO: 
 			* Check for clock backward drift first.
 			* If ( now() < state.getTime() ) {
 			*     HandleBackwardClockDrift();
@@ -239,7 +239,7 @@ public class VIdGenerator {
 
 		VId currVId;
 
-		/*
+		/* TODO: 
 		* Check for clock backward drift first.
 		* If ( now() < state.getTime() ) {
 		*     HandleBackwardClockDrift();
