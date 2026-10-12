@@ -137,7 +137,7 @@ public class AdjustorAndUpdator {
 	}
 
 	/*
-	* TODO: Check if entire sequencer range has nit been exhausted 
+	* TODO: Check if entire sequencer range has not been exhausted 
 	*         then Save current state and old state both to DB to be retrieved later.
 	* 
 	*/
