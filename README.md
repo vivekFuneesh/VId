@@ -62,7 +62,7 @@ Number/Frequency of state-updations is also extremely less and is -->0 with cert
 
 Flexibilities:-
 
-This dependency on dynamic-state-of-algorithm can be removed using appropriate switches & gears but then it would be called as minimal basic implementation because current final-minimal-version is supporting 80+ variations of this VId and this minimal-basic is not coded for this boring switch-gear combination as it's not much scalable for high performance machines.
+This dependency on dynamic-state-of-algorithm can be removed using appropriate switches & gears but then it would be called as minimal basic implementation because current final-minimal-version is supporting 80+ variations of this VId.
 
 Any number of symbols can be used, yes that's also possible without any collision and tracking other that the dynamic-updation-of-state.
 
@@ -72,3 +72,4 @@ Other stuffs too... mentioned in <a href="https://youtube.com/playlist?list=PLxx
 
 Version Alpha's output of the year 2020 is being put inside Alpha* folder.
 
+Some points mentioned as "TODO" were already done in 2022 but "TODO" check was not removed from comments to have a glimpse of progressive developement and some of them are remaining.
