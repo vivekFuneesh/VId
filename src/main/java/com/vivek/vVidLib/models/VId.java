@@ -24,6 +24,8 @@ package com.vivek.vVidLib.models;
 
 import java.util.Map;
 
+import com.vivek.vVidLib.models.AssemblingChoice.ASSEMBLY_SEQUENCE;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -46,7 +48,15 @@ public class VId {
 
 	private int numberOfSymbolsPostAssembly;
 
+	private int finalBitLengthConstraint;
+
+	private int finalSecondBase;
+
+	private int finalFirstBase;
+
 	private AssemblingChoice assemblingChoice;
+
+	private ASSEMBLY_SEQUENCE assemblySequence;
 
 	private ShufflingChoice shufflingChoiceInAssembly;
 
@@ -57,9 +67,11 @@ public class VId {
 	private Randomizer randomizer;
 
 	/**
-	 * ***DEFAULTS TO TIMER'S SYMBOLTABLE**** For a given symbol, where is it
-	 * present in final symbol table
+	 * For a given symbol, where is it present in final symbol table. Constant,
+	 * Unmodified.
 	 */
 	private Map<String, Integer> reverseSymbolTableMapping;
+
+	private Map<Integer, String> finalSymbolTable;
 
 }

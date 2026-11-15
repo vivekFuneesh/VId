@@ -24,7 +24,7 @@
  * 
  *     To connect with author, possible way to reach is via email 
  *     vivek.funeesh@gmail.com 
- * */    
+ * */
 
 package com.vivek.vVidLib;
 
@@ -51,44 +51,43 @@ import com.vivek.vVidLib.utility.Uniqueness_Check_Program;
 @SpringBootTest
 @TestMethodOrder(OrderAnnotation.class)
 class VVidLibApplicationTests {
-	
+
 	@Autowired
 	SampleVIdService sampleService;
 
 	InitializerDto dto;
-	
+
 	@Autowired
 	VIdStateRepo repo;
-	
+
 	@Autowired
 	ApplicationContext context;
-	
+
 	@Autowired
 	ObjectMapper om;
-	
-	
+
 	@Test
 	void contextLoads() {
 	}
-	
+
 	@BeforeEach
 	void initialize() {
 		dto = new InitializerDto();
-		//F
+		// F
 		dto.setSequencerChoice(SequencerChoice.FAST);
-		
-		//{P,Fi,Fi}
+
+		// {P,Fi,Fi}
 		dto.setSequencerShufflingChoice(ShufflingChoice.RANDOM_PLACE_MAPPINGS);
 		dto.setRandomizerShufflingChoice(ShufflingChoice.FIXED_POSITIONS);
 		dto.setTimerShufflingChoice(ShufflingChoice.FIXED_POSITIONS);
-		
-		//2
+
+		// 2
 		dto.setAssemblingChoice(AssemblingChoice.MIX_TIMER_SEQUENCER_RANDOMIZER);
-		
-		//P
+
+		// P
 		dto.setShufflingChoiceInAssembly(ShufflingChoice.RANDOM_PLACE_MAPPINGS);
 	}
-	
+
 	@Test
 	@Order(1)
 	void testSF2P() {
@@ -98,35 +97,34 @@ class VVidLibApplicationTests {
 		dto.setVIdCountToGenerate(2000);
 		assertThat(sampleService.getVId(dto, context, om)).isNotNull();
 
-		Uniqueness_Check_Program.main(new String[]{"SF2P_2000.txt"});
+		Uniqueness_Check_Program.main(new String[] { "SF2P_2000.txt" });
 	}
-	
+
 	@Test
 	@Order(2)
 	void testSF2Fi() {
 		repo.deleteAll();
-		
+
 		dto.setSaveIntoFile("SF2Fi");
 		dto.setSequencerChoice(SequencerChoice.SLOW);
 		dto.setShufflingChoiceInAssembly(ShufflingChoice.FIXED_POSITIONS);
-		
+
 		dto.setVIdCountToGenerate(2000);
 		assertThat(sampleService.getVId(dto, context, om)).isNotNull();
-		Uniqueness_Check_Program.main(new String[]{"SF2Fi_2000.txt"});
+		Uniqueness_Check_Program.main(new String[] { "SF2Fi_2000.txt" });
 	}
-
 
 	@Test
 	@Order(3)
 	void testSF2Fi_2Nd_Call() {
-		
+
 		dto.setSaveIntoFile("SF2Fi");
-		
+
 		dto.setVIdCountToGenerate(2000);
 		assertThat(sampleService.getVId(dto, context, om)).isNotNull();
-		Uniqueness_Check_Program.main(new String[]{"SF2Fi_2000.txt"});
+		Uniqueness_Check_Program.main(new String[] { "SF2Fi_2000.txt" });
 	}
-	
+
 	@Test
 	@Order(4)
 	void testFF2Fi() {
@@ -135,12 +133,12 @@ class VVidLibApplicationTests {
 		dto.setSequencerChoice(SequencerChoice.FAST);
 		dto.setRandomizerShufflingChoice(ShufflingChoice.RANDOM_PLACE_MAPPINGS);
 		dto.setShufflingChoiceInAssembly(ShufflingChoice.FIXED_POSITIONS);
-		
+
 		dto.setVIdCountToGenerate(2000);
 		assertThat(sampleService.getVId(dto, context, om)).isNotNull();
-		Uniqueness_Check_Program.main(new String[]{"FF2Fi_2000.txt"});
+		Uniqueness_Check_Program.main(new String[] { "FF2Fi_2000.txt" });
 	}
-	
+
 	@Test
 	@Order(5)
 	void testFF2P() {
@@ -148,12 +146,12 @@ class VVidLibApplicationTests {
 		dto.setSaveIntoFile("FF2P");
 		dto.setSequencerChoice(SequencerChoice.FAST);
 		dto.setShufflingChoiceInAssembly(ShufflingChoice.RANDOM_PLACE_MAPPINGS);
-		
+
 		dto.setVIdCountToGenerate(2000);
 		assertThat(sampleService.getVId(dto, context, om)).isNotNull();
-		Uniqueness_Check_Program.main(new String[]{"FF2P_2000.txt"});
+		Uniqueness_Check_Program.main(new String[] { "FF2P_2000.txt" });
 	}
-	
+
 	@Test
 	@Order(6)
 	void testSP1Fi() {
@@ -162,12 +160,12 @@ class VVidLibApplicationTests {
 		dto.setSequencerChoice(SequencerChoice.SLOW);
 		dto.setAssemblingChoice(AssemblingChoice.MIX_ONLY_TIMER_SEQUENCER);
 		dto.setShufflingChoiceInAssembly(ShufflingChoice.FIXED_POSITIONS);
-		
+
 		dto.setVIdCountToGenerate(2000);
 		assertThat(sampleService.getVId(dto, context, om)).isNotNull();
-		Uniqueness_Check_Program.main(new String[]{"SP1Fi_2000.txt"});
+		Uniqueness_Check_Program.main(new String[] { "SP1Fi_2000.txt" });
 	}
-	
+
 	@Test
 	@Order(7)
 	void testSP1P() {
@@ -176,12 +174,12 @@ class VVidLibApplicationTests {
 		dto.setSequencerChoice(SequencerChoice.SLOW);
 		dto.setAssemblingChoice(AssemblingChoice.MIX_ONLY_TIMER_SEQUENCER);
 		dto.setShufflingChoiceInAssembly(ShufflingChoice.RANDOM_PLACE_MAPPINGS);
-		
+
 		dto.setVIdCountToGenerate(2000);
 		assertThat(sampleService.getVId(dto, context, om)).isNotNull();
-		Uniqueness_Check_Program.main(new String[]{"SP1P_2000.txt"});
+		Uniqueness_Check_Program.main(new String[] { "SP1P_2000.txt" });
 	}
-	
+
 	@Test
 	@Order(8)
 	void testFP1P() {
@@ -194,19 +192,19 @@ class VVidLibApplicationTests {
 		dto.setTimerShufflingChoice(ShufflingChoice.RANDOM_PLACE_MAPPINGS);
 		dto.setVIdCountToGenerate(2000);
 		assertThat(sampleService.getVId(dto, context, om)).isNotNull();
-		Uniqueness_Check_Program.main(new String[]{"FP1P_2000.txt"});
+		Uniqueness_Check_Program.main(new String[] { "FP1P_2000.txt" });
 	}
 
 	@Test
 	@Order(9)
 	void testFP1P_2nd_Call() {
-		
+
 		dto.setSaveIntoFile("FP1P");
 		dto.setVIdCountToGenerate(2000);
 		assertThat(sampleService.getVId(dto, context, om)).isNotNull();
-		Uniqueness_Check_Program.main(new String[]{"FP1P_2000.txt"});
+		Uniqueness_Check_Program.main(new String[] { "FP1P_2000.txt" });
 	}
-	
+
 	@Test
 	@Order(10)
 	void testFP1Fi() {
@@ -219,19 +217,19 @@ class VVidLibApplicationTests {
 		dto.setSequencerShufflingChoice(ShufflingChoice.FIXED_POSITIONS);
 		dto.setVIdCountToGenerate(2000);
 		assertThat(sampleService.getVId(dto, context, om)).isNotNull();
-		Uniqueness_Check_Program.main(new String[]{"FP1Fi_2000.txt"});
+		Uniqueness_Check_Program.main(new String[] { "FP1Fi_2000.txt" });
 	}
-	
+
 	@Test
 	@Order(11)
 	void testFP1Fi_2nd_Call() {
 		dto.setSaveIntoFile("FP1Fi");
-		
+
 		dto.setVIdCountToGenerate(2000);
 		assertThat(sampleService.getVId(dto, context, om)).isNotNull();
-		Uniqueness_Check_Program.main(new String[]{"FP1Fi_2000.txt"});
+		Uniqueness_Check_Program.main(new String[] { "FP1Fi_2000.txt" });
 	}
-	
+
 	@Test
 	@Order(12)
 	void testFP0() {
@@ -239,28 +237,27 @@ class VVidLibApplicationTests {
 		dto.setSaveIntoFile("FP0");
 		dto.setSequencerChoice(SequencerChoice.FAST);
 		dto.setAssemblingChoice(AssemblingChoice.NO_MIXING);
-		//below should be converted to null, check in system.out logs
+		// below should be converted to null, check in system.out logs
 		dto.setShufflingChoiceInAssembly(ShufflingChoice.FIXED_POSITIONS);
 
 		dto.setSequencerShufflingChoice(ShufflingChoice.FIXED_POSITIONS);
 		dto.setTimerShufflingChoice(ShufflingChoice.RANDOM_PLACE_MAPPINGS);
 		dto.setRandomizerShufflingChoice(ShufflingChoice.RANDOM_PLACE_MAPPINGS);
-		
+
 		dto.setVIdCountToGenerate(2000);
 		assertThat(sampleService.getVId(dto, context, om)).isNotNull();
-		Uniqueness_Check_Program.main(new String[]{"FP0_2000.txt"});
+		Uniqueness_Check_Program.main(new String[] { "FP0_2000.txt" });
 	}
 
 	@Test
 	@Order(13)
 	void testFP0_2Nd_Call() {
 		dto.setSaveIntoFile("FP0");
-				
 		dto.setVIdCountToGenerate(2000);
 		assertThat(sampleService.getVId(dto, context, om)).isNotNull();
-		Uniqueness_Check_Program.main(new String[]{"FP0_2000.txt"});
+		Uniqueness_Check_Program.main(new String[] { "FP0_2000.txt" });
 	}
-	
+
 	@Test
 	@Order(14)
 	void testSP0() {
@@ -268,28 +265,26 @@ class VVidLibApplicationTests {
 		dto.setSaveIntoFile("SP0");
 		dto.setSequencerChoice(SequencerChoice.SLOW);
 		dto.setAssemblingChoice(AssemblingChoice.NO_MIXING);
-		//below should be converted to null, check in system.out logs
+		// below should be converted to null, check in system.out logs
 		dto.setShufflingChoiceInAssembly(ShufflingChoice.FIXED_POSITIONS);
 
 		dto.setSequencerShufflingChoice(ShufflingChoice.FIXED_POSITIONS);
 		dto.setTimerShufflingChoice(ShufflingChoice.RANDOM_PLACE_MAPPINGS);
 		dto.setRandomizerShufflingChoice(ShufflingChoice.RANDOM_PLACE_MAPPINGS);
-		
 		dto.setVIdCountToGenerate(2000);
 		assertThat(sampleService.getVId(dto, context, om)).isNotNull();
-		Uniqueness_Check_Program.main(new String[]{"SP0_2000.txt"});
+		Uniqueness_Check_Program.main(new String[] { "SP0_2000.txt" });
 	}
-	
+
 	@Test
 	@Order(15)
 	void testSP0_2Nd_Call() {
 		dto.setSaveIntoFile("SP0");
-				
 		dto.setVIdCountToGenerate(2000);
 		assertThat(sampleService.getVId(dto, context, om)).isNotNull();
-		Uniqueness_Check_Program.main(new String[]{"SP0_2000.txt"});
+		Uniqueness_Check_Program.main(new String[] { "SP0_2000.txt" });
 	}
-	
+
 	@Test
 	@Order(16)
 	void test_MaxLenT_FFi2P_Precision_0_BaseTime_0_Max_Length_Timer() {
@@ -297,18 +292,17 @@ class VVidLibApplicationTests {
 		dto.setSaveIntoFile("MaxLenT-FFi2P");
 		dto.setSequencerChoice(SequencerChoice.FAST);
 		dto.setAssemblingChoice(AssemblingChoice.MIX_TIMER_SEQUENCER_RANDOMIZER);
-		
 		dto.setShufflingChoiceInAssembly(ShufflingChoice.RANDOM_PLACE_MAPPINGS);
 
 		dto.setSequencerShufflingChoice(ShufflingChoice.FIXED_POSITIONS);
 		dto.setTimerShufflingChoice(ShufflingChoice.RANDOM_PLACE_MAPPINGS);
 		dto.setRandomizerShufflingChoice(ShufflingChoice.RANDOM_PLACE_MAPPINGS);
-		
+
 		dto.setVIdCountToGenerate(2000);
 		assertThat(sampleService.getVId(dto, context, om)).isNotNull();
-		Uniqueness_Check_Program.main(new String[]{"MaxLenT-FFi2P_2000.txt"});
+		Uniqueness_Check_Program.main(new String[] { "MaxLenT-FFi2P_2000.txt" });
 	}
-	
+
 	@Test
 	@Order(17)
 	void test_MaxLenT_FP2P_Precision_0_BaseTime_0_Max_Length_Timer() {
@@ -316,15 +310,14 @@ class VVidLibApplicationTests {
 		dto.setSaveIntoFile("MaxLenT-FP2P");
 		dto.setSequencerChoice(SequencerChoice.FAST);
 		dto.setAssemblingChoice(AssemblingChoice.MIX_TIMER_SEQUENCER_RANDOMIZER);
-		
 		dto.setShufflingChoiceInAssembly(ShufflingChoice.RANDOM_PLACE_MAPPINGS);
 
 		dto.setSequencerShufflingChoice(ShufflingChoice.RANDOM_PLACE_MAPPINGS);
 		dto.setTimerShufflingChoice(ShufflingChoice.RANDOM_PLACE_MAPPINGS);
 		dto.setRandomizerShufflingChoice(ShufflingChoice.RANDOM_PLACE_MAPPINGS);
-		
+
 		dto.setVIdCountToGenerate(2000);
 		assertThat(sampleService.getVId(dto, context, om)).isNotNull();
-		Uniqueness_Check_Program.main(new String[]{"MaxLenT-FP2P_2000.txt"});
+		Uniqueness_Check_Program.main(new String[] { "MaxLenT-FP2P_2000.txt" });
 	}
 }

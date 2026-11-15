@@ -26,5 +26,15 @@ public enum AssemblingChoice {
 	NO_MIXING, // TBD: IT CAN CONTAIN UPTO 6 USER-DEFINED SCENARIOS: random-timer-sequencer,
 				// r-s-t, t-s-r, t-r-s, s-t-r, s-r-t.
 	MIX_ONLY_TIMER_SEQUENCER, // IT can be R-(ts) or (ts)-Random or (st)-R or R-(st)
-	MIX_TIMER_SEQUENCER_RANDOMIZER
+
+	MIX_TIMER_SEQUENCER_RANDOMIZER;
+
+	public enum ASSEMBLY_PARTS {
+		T, S, R;
+	}
+
+	public enum ASSEMBLY_SEQUENCE {
+		TSR, TRS, STR, SRT, RTS, RST;
+
+	}
 }

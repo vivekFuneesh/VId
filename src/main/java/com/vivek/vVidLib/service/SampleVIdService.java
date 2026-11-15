@@ -62,6 +62,10 @@ public interface SampleVIdService {
 					System.out.println(" processed" + i);
 				VId vId = vIdGenerator.getNext(dto);
 
+				if (i < 2) {
+					System.out.println("\nvid generated with i=" + i + "\n" + vId + "\n");
+				}
+
 				if (i == 0) {
 					System.out.println("Sequencer choice" + vId.getSequencer().getSeqC());
 					System.out.println("shuffling choice" + vId.getTimer().getShufflingChoice() + " "
@@ -94,7 +98,8 @@ public interface SampleVIdService {
 
 			writer.flush();
 			writer.close();
-			Uniqueness_Check_Program.main(new String[] {file.toPath().toString()});
+
+			Uniqueness_Check_Program.main(new String[] { file.toPath().toString() });
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

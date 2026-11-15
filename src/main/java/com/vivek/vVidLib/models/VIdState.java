@@ -26,6 +26,8 @@ import java.util.Map;
 
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import com.vivek.vVidLib.models.AssemblingChoice.ASSEMBLY_SEQUENCE;
+
 import lombok.Data;
 
 @Document
@@ -37,13 +39,21 @@ public class VIdState {
 	 */
 	private String _id;
 
-	private int bitsLengthPostAssembly;
-	private int numberOfSymbolsPostAssembly;
-	private AssemblingChoice assemblingChoice;
-	private ShufflingChoice shufflingChoiceInAssembly;
-	private Map<String, Integer> reverseSymbolTableMapping;
 	private String valueInBitsPostAssembly;
 	private String vid;
+
+	private int bitsLengthPostAssembly;
+	private int numberOfSymbolsPostAssembly;
+	private int finalBitLengthConstraint;
+	private int finalSecondBase;
+	private int finalFirstBase;
+
+	private AssemblingChoice assemblingChoice;
+	private ASSEMBLY_SEQUENCE assemblySequence;
+	private ShufflingChoice shufflingChoiceInAssembly;
+
+	private Map<String, Integer> reverseSymbolTableMapping;
+	private Map<Integer, String> finalSymbolTable;
 
 	private TimerState timerState;
 

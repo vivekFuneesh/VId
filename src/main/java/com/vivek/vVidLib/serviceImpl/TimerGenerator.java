@@ -45,11 +45,31 @@ public class TimerGenerator implements Generator {
 
 		Timer timer = timerz.getTimer();
 
-		timer.setActualValue(BigInteger.valueOf(getTimeInMillis()).subtract(timer.getBaseTime()));
+		if (timer.getPrecisedValue() == null) {
+			// reset basetime
+			// it acts as a starting point for 0, 00, 000, 0000.. series.
+			timer.setBaseTime(BigInteger.valueOf(getTimeInMillis()));
 
-		timer.setPrecisedValue(timer.getActualValue().divide(BigInteger.TEN.pow(timer.getPrecision())));
+			timer.setActualValue(BigInteger.ZERO);
 
-		VIdUtility.populateValueAndLengths(timer, timer.getPrecisedValue().toString());
+			timer.setPrecisedValue(BigInteger.ZERO);
+
+			timer.setCurrentNumberOfSymbols(timer.getInitialNumberOfSymbols());
+
+			timer.setValueInBits(VIdUtility.convertToDefaultValueFromNumber(
+					VIdUtility.calculateNumberOf2ndBasedBitsFromNumberOfSymbols(timer.getInitialNumberOfSymbols(),
+							timer.getBitLengthConstraint()),
+					0));
+
+			timer.setCurrentBitsLength(timer.getValueInBits().length());
+		} else {
+
+			timer.setActualValue(BigInteger.valueOf(getTimeInMillis()).subtract(timer.getBaseTime()));
+
+			timer.setPrecisedValue(timer.getActualValue().divide(BigInteger.TEN.pow(timer.getPrecision())));
+
+			VIdUtility.populateValueAndLengths(timer, timer.getPrecisedValue().toString());
+		}
 	}
 
 	private long getTimeInMillis() {

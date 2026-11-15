@@ -57,16 +57,19 @@ public class VIdUtility {
 	}
 
 	public static void populateValueAndLengths(CommonFields field, String valueAsString) {
+
 		String valueInBits = VIdUtility.getBitiedStringPerBaseWithLengthAdjusted(valueAsString, field.getFirstBase(),
 				field.getBitLengthConstraint(), field.getSecondBase());
 
 		if (valueInBits.length() < field.getCurrentBitsLength()) {
+
 			valueInBits = VIdUtility.convertToDefaultValueFromNumber(
 					field.getCurrentBitsLength() - valueInBits.length(), 0) + valueInBits;
-		} else {
-			field.setCurrentBitsLength(valueInBits.length());
 
 		}
+
+		field.setCurrentBitsLength(valueInBits.length());
+
 		field.setCurrentNumberOfSymbols(VIdUtility.calculateNumberOfSymbolsFrom2ndBasedBitsCount(valueInBits.length(),
 				field.getBitLengthConstraint()));
 		field.setValueInBits(valueInBits);
@@ -108,11 +111,12 @@ public class VIdUtility {
 		return numberOfBits / bitLengthConstraint;
 	}
 
+	// keeping bitLengthConstraint as same as timer's for now.
 	public static void mapBitsWithSecondBaseToSymbols(VId vId) {
 		List<String> indices = convertTo1stBasedListOfNumbersFromBitsWithSecondBase(vId.getValueInBitsPostAssembly(),
-				vId.getTimer().getBitLengthConstraint(), vId.getTimer().getSecondBase());
+				vId.getFinalBitLengthConstraint(), vId.getFinalSecondBase());
 		vId.setVid(indices.stream().map(index -> {
-			return vId.getTimer().getSymbolTable().get(Integer.valueOf(index));
+			return vId.getFinalSymbolTable().get(Integer.valueOf(index));
 		}).collect(Collectors.joining()));
 
 		vId.setNumberOfSymbolsPostAssembly(vId.getVid().length());
@@ -173,10 +177,14 @@ public class VIdUtility {
 	public static String convertToNumberFromBitsWithSecondBase(String bits, int firstBase, int bitLengthConstraint,
 			int secondBase) {
 		List<String> numbers = new ArrayList<>();
-		if (secondBase > 1) {
-			numbers = VIdUtility.convertToListOfNumbersFromBitsWithBaseAndLengthPerDigit(bits, secondBase,
-					bitLengthConstraint);
-		}
+		numbers = VIdUtility.convertToListOfNumbersFromBitsWithBaseAndLengthPerDigit(bits, secondBase,
+				bitLengthConstraint);
+		/*
+		 * if (secondBase > 1) { numbers =
+		 * VIdUtility.convertToListOfNumbersFromBitsWithBaseAndLengthPerDigit(bits,
+		 * secondBase, bitLengthConstraint); } else throw new
+		 * RuntimeException("Second Base Not set");
+		 */
 
 		return VIdUtility.convertToNumberFromNonBinaryBitsWithBase(numbers, firstBase);
 	}
@@ -184,11 +192,14 @@ public class VIdUtility {
 	public static List<String> convertTo1stBasedListOfNumbersFromBitsWithSecondBase(String bits,
 			int bitLengthConstraint, int secondBase) {
 		List<String> numbers = new ArrayList<>();
-		if (secondBase > 1) {
-			numbers = VIdUtility.convertToListOfNumbersFromBitsWithBaseAndLengthPerDigit(bits, secondBase,
-					bitLengthConstraint);
-		} else
-			throw new RuntimeException("Second Base Not set");
+		numbers = VIdUtility.convertToListOfNumbersFromBitsWithBaseAndLengthPerDigit(bits, secondBase,
+				bitLengthConstraint);
+		/*
+		 * if (secondBase > 1) { numbers =
+		 * VIdUtility.convertToListOfNumbersFromBitsWithBaseAndLengthPerDigit(bits,
+		 * secondBase, bitLengthConstraint); } else throw new
+		 * RuntimeException("Second Base Not set");
+		 */
 		return numbers;
 
 	}
@@ -238,12 +249,21 @@ public class VIdUtility {
 		BigInteger strNum = new BigInteger(string);
 		List<String> bitList = convertToBitsWithBaseFromNumbers(strNum, BigInteger.valueOf(firstBase));
 		// System.out.println("list of bitieed with 1st base is: " + bitList);
-		return secondBase > 1 ? bitList.stream()
+		/*
+		 * if(secondBase <=1) { throw new RuntimeException("Second Base Not set"); }
+		 */
+		return bitList.stream()
 				.map(str -> convertToBitsWithBaseFromNumbers(new BigInteger(str), BigInteger.valueOf(secondBase))
 						.stream().collect(Collectors.joining()))
 				.map(bits -> {
 					return convertToDefaultValueFromNumber(bitLengthConstraint - bits.length(), 0) + bits;
-				}).collect(Collectors.joining()) : bitList.stream().collect(Collectors.joining());
+				}).collect(Collectors.joining());
+		/**
+		 * //case of 2ndBase == 1 : bitList.stream() //new one update below to prepend
+		 * 0s when 2nd base is 1. this will increase shuffling. .map(str -> { return
+		 * convertToDefaultValueFromNumber(bitLengthConstraint - str.length(), 0) + str;
+		 * }).collect(Collectors.joining());
+		 */
 	}
 
 	public static char[] lsbOverMsbMixer(char[] result, String strToProcess) {
@@ -291,8 +311,11 @@ public class VIdUtility {
 	}
 
 	/**
-	 * sorting is used here assuming that index(key) may not start from 0 or may not
-	 * be sequentially increasing!! though, currently that is not the case.
+	 * <<<<<<< HEAD sorting is used here assuming that index(key) may not start from
+	 * 0 or may not be sequentially increasing!! though, currently that is not the
+	 * case. ======= fun: sorting is used here assuming that index(key) may not
+	 * start from 0 or may not be sequentially increasing!! though, currently that
+	 * is not the case. >>>>>>> 451711e (some updates)
 	 */
 	public static Map<Integer, Integer> modifyPlaceMappings(Map<Integer, Integer> originalMapping) {
 
@@ -343,6 +366,30 @@ public class VIdUtility {
 			keys.get(mapIndex.getAndIncrement()).stream()
 					.forEach(mapKey -> map.put(mapKey, values.get(valueIndex.getAndIncrement())));
 
+		});
+
+	}
+
+	public static void validate(VId vid, List<CommonFields> parts) {
+		parts.stream().forEach(part -> {
+			if (part.getSecondBase() <= 1) {
+				throw new RuntimeException("2nd Base not set" + part.toString());
+			}
+		});
+	}
+
+	public static void shuffleSymbolStore(Map<Integer, String> symbolTable, Random random) {
+
+		List<Integer> keys = symbolTable.keySet().stream().sorted().collect(Collectors.toList());
+
+		List<String> values = keys.stream().map(key -> symbolTable.get(key)).collect(Collectors.toList());
+
+		Collections.shuffle(values, random);
+
+		AtomicInteger index = new AtomicInteger(0);
+
+		keys.stream().forEach(key -> {
+			symbolTable.put(key, values.get(index.getAndIncrement()));
 		});
 
 	}
