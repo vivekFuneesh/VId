@@ -33,6 +33,8 @@
  * 20Compliance%20Notice.md
  */
 
+package com.vivek.vVidLib.service;
+
 public interface HandleBackwardClockDrift {
 
 	/*
