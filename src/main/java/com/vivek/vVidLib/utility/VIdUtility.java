@@ -311,11 +311,9 @@ public class VIdUtility {
 	}
 
 	/**
-	 * <<<<<<< HEAD sorting is used here assuming that index(key) may not start from
-	 * 0 or may not be sequentially increasing!! though, currently that is not the
-	 * case. ======= fun: sorting is used here assuming that index(key) may not
+	 * fun: sorting is used here assuming that index(key) may not
 	 * start from 0 or may not be sequentially increasing!! though, currently that
-	 * is not the case. >>>>>>> 451711e (some updates)
+	 * is not the case.
 	 */
 	public static Map<Integer, Integer> modifyPlaceMappings(Map<Integer, Integer> originalMapping) {
 
