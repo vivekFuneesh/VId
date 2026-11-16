@@ -44,5 +44,8 @@ public class Sequencer extends CommonFields {
 
 	private SequencerChoice seqC;
 
+	// number of symbols from which a sequencer starts.
+	// this will incorporate 0, 00, 000 as different in further processing of
+	// sequenceGenerator.
 	private int initialNumberOfSymbols;
 }

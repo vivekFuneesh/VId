@@ -31,6 +31,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class CommonFields {
 
+	// value in bits form in 2nd base.
 	private String valueInBits;
 
 	/**
@@ -39,9 +40,9 @@ public class CommonFields {
 	 */
 	private String rectifiedValueInBitsDuringAsembly;
 
-	private int currentNumberOfSymbols;
+	private int currentNumberOfSymbols; // no. of symbols in 1st base
 
-	private int currentBitsLength;
+	private int currentBitsLength; // bits length in 2nd base form
 
 	/**
 	 * For eg. table Length is 8, firstBase will be 8, let's take secondBase to be
@@ -63,7 +64,7 @@ public class CommonFields {
 
 	private Map<Integer, Integer> bitsInternalPlaceMappings; // map original bit positions to random position within
 
-	private Map<Integer, Integer> indexToVidPlaceMappings; // map position within generated&shuffled to position in VId
+	private Map<Integer, Integer> indexToVidPlaceMappings; // map position within to position in VId
 
 	private ShufflingChoice shufflingChoice;
 

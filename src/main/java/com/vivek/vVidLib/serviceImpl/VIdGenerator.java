@@ -57,7 +57,6 @@ import com.vivek.vVidLib.models.TimerState;
 import com.vivek.vVidLib.models.VId;
 import com.vivek.vVidLib.models.VIdState;
 import com.vivek.vVidLib.repository.VIdStateRepo;
-import com.vivek.vVidLib.service.HandleBackwardClockDrift;
 import com.vivek.vVidLib.utility.VIdUtility;
 
 /**
@@ -129,14 +128,14 @@ import com.vivek.vVidLib.utility.VIdUtility;
  * 
  */
 
- /**
- * TODO: IMPORTANT: Check if need upgrade to exhaust complete domain at every place.. 
- * One way is - use series of symbols instead of digits from 0 to 9..
- * That will cover entire symbols domain. But I think that is what all generators do. 
- * Another way is to go as usual and modify symbol mappings and length updation
- * logic, shuffling logic, placemappings logic OR just update conditions for them to trigger
- * i.e. instead of digits - use symbol table length to determine length increment
- * or (check if required) both!
+/**
+ * TODO: IMPORTANT: Check if need upgrade to exhaust complete domain at every
+ * place.. One way is - use series of symbols instead of digits from 0 to 9..
+ * That will cover entire symbols domain. But I think that is what all
+ * generators do. Another way is to go as usual and modify symbol mappings and
+ * length updation logic, shuffling logic, placemappings logic OR just update
+ * conditions for them to trigger i.e. instead of digits - use symbol table
+ * length to determine length increment or (check if required) both!
  */
 
 @Component
@@ -172,13 +171,12 @@ public class VIdGenerator {
 		System.out.println("Inside checkAndLoad");
 		state = vIdStateRepo.findAll().stream().findFirst().orElse(null);
 
-		if (state != null) { 
-			/* TODO: 
-			* Check for clock backward drift first.
-			* HandleBackwardClockDrift();
-			*
-			*/
-			
+		if (state != null) {
+			/*
+			 * TODO: Check for clock backward drift first. HandleBackwardClockDrift();
+			 *
+			 */
+
 			System.out.println("Loading form DB--");
 			currentVId = mm.map(state, VId.class);
 			currentVId.setTimer(mm.map(state.getTimerState(), Timer.class));
@@ -239,13 +237,11 @@ public class VIdGenerator {
 		return currentVId;
 	}
 
-	public void sampleGenerateVIds(InitializerDto dto) {
-		VId currVId = null;
-		for (int i = 0; i < 35; i++) {
-			currVId = getNext(currVId, dto);
-			System.out.println(currVId.getVid());
-		}
-	}
+	/*
+	 * public void sampleGenerateVIds(InitializerDto dto) { VId currVId = null; for
+	 * (int i = 0; i < 35; i++) { currVId = getNext(currVId, dto);
+	 * System.out.println(currVId.getVid()); } }
+	 */
 
 	/**
 	 * if oldVId is null-> defaultInitialize currVId else load(deep-copy into
@@ -255,17 +251,18 @@ public class VIdGenerator {
 
 		VId currVId;
 
-		/* TODO: 
-		* Check for clock backward drift first.
-		* HandleBackwardClockDrift();
-		*
-		*/
+		/*
+		 * TODO: Check for clock backward drift first. HandleBackwardClockDrift();
+		 *
+		 */
 
 		if (oldVId == null) {
 			currVId = new VId();
 			currVId.setTimer(new Timer());
 			currVId.setSequencer(new Sequencer());
 			currVId.setRandomizer(new Randomizer());
+
+			System.out.println("\n dto's shufll choice in assembly = " + dto.getShufflingChoiceInAssembly() + "\n");
 
 			if (dto.getShufflingChoiceInAssembly() != null)
 				currVId.setShufflingChoiceInAssembly(dto.getShufflingChoiceInAssembly());
@@ -294,11 +291,14 @@ public class VIdGenerator {
 
 		List<CommonFields> parts = Arrays.asList(currVId.getTimer(), currVId.getSequencer(), currVId.getRandomizer());
 
+		VIdUtility.validate(currVId, parts);
+
 		// Generate
 		generate(currVId, parts);
 
 		// if 1st time then after generate, produce internal & VId place mappings
 		if (oldVId == null) {
+			// AssemblingChoice takes preference over shufflingChoiceInAssembly
 
 			if (currVId.getAssemblingChoice() == AssemblingChoice.NO_MIXING) {
 				parts.stream().forEach(part -> part.setIndexToVidPlaceMappings(null));
@@ -313,6 +313,9 @@ public class VIdGenerator {
 			} else {
 				parts.stream().forEach(part -> part.setIndexToVidPlaceMappings(null));
 			}
+
+			// currentNumberOfSymbolsRequired, so creating internalMappings post timer
+			// generator
 
 			if (currVId.getTimer().getShufflingChoice() == ShufflingChoice.RANDOM_PLACE_MAPPINGS) {
 				InitializerAndVerifier.defaultInternalPlaceMappings(currVId.getTimer(),

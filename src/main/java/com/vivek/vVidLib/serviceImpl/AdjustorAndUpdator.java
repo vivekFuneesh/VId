@@ -2,7 +2,7 @@
 *     TO CORPORATE ARCHITECTS, ENGINEERING TEAMS, AND INDEPENDENT RE-IMPLEMENTORS: <br>
 *   ⚠️Read Legal And Commercial Compliance Notice from link below⚠️ <br>
 *     https://github.com/vivekFuneesh/VId/blob/master/Legal%20and%20Commercial%20Compliance%20Notice.md
-*/ 
+*/
 
 /**
  * VVId (VId), Vivek's Id or Vivek's virtual Id is a technique  or algorithm to generate 
@@ -30,13 +30,7 @@ package com.vivek.vVidLib.serviceImpl;
 
 import java.math.BigInteger;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
@@ -75,8 +69,13 @@ public class AdjustorAndUpdator {
 
 		Timer currTimer = currVId.getTimer();
 
+		// It also addresses the case when timer also increased in value simultaneously
+		// when sequencer
+		// exhausted and increased in length... Timer is given preference as it is
+		// continuously increasing.
+
 		if (oldVId.getTimer().getPrecisedValue().compareTo(currVId.getTimer().getPrecisedValue()) < 0) {
-			
+
 			/*
 			 * ----------1----------- reset length of sequencerBits to old, shuffle
 			 * symbol-store for sequencer and randomizer, regenerate sequencer and
@@ -91,12 +90,16 @@ public class AdjustorAndUpdator {
 
 			if (oldVId.getSequencer().getSeqC() == SequencerChoice.SLOW) {
 				/**
-				 * Manipulating using Actual Value because oldtimer's Value has been shuffled
+				 * Manipulating using Precised Value because oldtimer's Value has been shuffled
 				 */
 				// wait for timer to increment
 				BigInteger oldTimeValue = oldVId.getTimer().getPrecisedValue();
 
+				/** HandleBackwardClockDrift logic should be included here too. */
+
 				while (oldTimeValue.compareTo(currTimer.getPrecisedValue()) == 0) {
+//					System.out.println("oldtimer= "+oldVId.getTimer()+"\ncurTimer= "+currVId.getTimer());
+//					System.out.println("oldVIdr= "+oldVId+"\ncurVId= "+currVId);
 					long waitTime = oldTimeValue.add(BigInteger.ONE)
 							.multiply(BigInteger.TEN.pow(currTimer.getPrecision())).longValueExact()
 							- currTimer.getActualValue().longValueExact();
@@ -104,8 +107,9 @@ public class AdjustorAndUpdator {
 						synchronized (currVId.getTimer().getSynchronizingObject()) {
 							System.out.println("Waiting for " + waitTime + " milliSeconds");
 							if (waitTime > 0) {
-
+//								System.out.println("\n--waiting\n");
 								currVId.getTimer().getSynchronizingObject().wait(waitTime);
+
 							}
 						}
 					} catch (InterruptedException e) {
@@ -118,18 +122,20 @@ public class AdjustorAndUpdator {
 				// same as 1 by waiting for timer to increment in value by resetting sequencer's
 				// length to that in old.
 
+//				System.out.println("out of wait");
 				handleIncrementInTimerValueWithLengthCheck(sc, currVId, oldVId);
 
 			} else {
 				/*
-				* In this case, entire sequencer range has been exhausted for a given timer value.
-				*/
+				 * In this case, entire sequencer range has been exhausted for a given timer
+				 * value.
+				 */
 				addInternalAndVIdMappings(oldVId.getSequencer(), currVId.getSequencer(), currVId, oldVId);
 				// both 1 and 2 except for the changes in length of sequencer in 1
 				currVId.getSequencer().setInitialNumberOfSymbols(currVId.getSequencer().getCurrentNumberOfSymbols());
-				//case when timer also increased in value simultaneously when sequencer exhausted and increased in length.
-				handleIncrementTimerValueCase(sc, currVId);
-				shuffleTimer(currVId);
+
+				resetRegenerateReshuffleAndRemapOfInternalAndVIdMappingsForSequencerAndRandomizer(sc, currVId);
+				shuffleTimer(sc, currVId);
 
 			}
 		}
@@ -137,17 +143,16 @@ public class AdjustorAndUpdator {
 	}
 
 	/*
-	* TODO: Check if entire sequencer range has not been exhausted 
-	*         then check if rectified symbol mappings is required, 
-	*              if required then pull from assembler or make here.
-	*              Save current state and old state both to DB to be retrieved later.
-	*       Ensure which symbols have been mapped to a particular place,
-	*       to properly exhaust complete domain as well.
-	*/
+	 * TODO: Check if entire sequencer range has not been exhausted then check if
+	 * rectified symbol mappings is required, if required then pull from assembler
+	 * or make here. Save current state and old state both to DB to be retrieved
+	 * later. Ensure which symbols have been mapped to a particular place, to
+	 * properly exhaust complete domain as well.
+	 */
 	private void handleIncrementInTimerValueWithLengthCheck(ServiceCaller serviceCaller, VId currVId, VId oldVId) {
 		// System.out.println(currVId.getSequencer().getValue());
 		currVId.getSequencer().setInitialNumberOfSymbols(oldVId.getSequencer().getCurrentNumberOfSymbols());
-		handleIncrementTimerValueCase(serviceCaller, currVId);
+		resetRegenerateReshuffleAndRemapOfInternalAndVIdMappingsForSequencerAndRandomizer(serviceCaller, currVId);
 
 		if (oldVId.getTimer().getCurrentNumberOfSymbols() < currVId.getTimer().getCurrentNumberOfSymbols()) {
 
@@ -156,7 +161,7 @@ public class AdjustorAndUpdator {
 			// shuffle timer symbol store, reallocate positions in VId, reshuffle with new
 			// place mappings within(if applicable)
 
-			shuffleTimer(currVId);
+			shuffleTimer(serviceCaller, currVId);
 
 		} else if (oldVId.getTimer().getCurrentBitsLength() != currVId.getTimer().getCurrentBitsLength()) {
 			// just a precautionary check!
@@ -191,10 +196,16 @@ public class AdjustorAndUpdator {
 		}
 	}
 
-	private void shuffleTimer(VId currVId) {
+	private void shuffleTimer(ServiceCaller serviceCaller, VId currVId) {
 
 		Timer currTimer = currVId.getTimer();
-		shuffleSymbolStore(currTimer.getSymbolTable(), ThreadLocalRandom.current());
+		VIdUtility.shuffleSymbolStore(currTimer.getSymbolTable(), ThreadLocalRandom.current());
+
+//		these 2 statements will reset timer-counter while maintaining length/no_of_symbols_in_timer
+		currTimer.setPrecisedValue(null);
+		currTimer.setInitialNumberOfSymbols(currTimer.getCurrentNumberOfSymbols());
+
+		serviceCaller.getTimerGenerator().generate(currVId);
 
 		if (currVId.getShufflingChoiceInAssembly() == ShufflingChoice.RANDOM_PLACE_MAPPINGS) {
 			if (currVId.getAssemblingChoice() == AssemblingChoice.MIX_TIMER_SEQUENCER_RANDOMIZER) {
@@ -216,15 +227,16 @@ public class AdjustorAndUpdator {
 
 	}
 
-	private void handleIncrementTimerValueCase(ServiceCaller serviceCaller, VId currVId) {
+	private void resetRegenerateReshuffleAndRemapOfInternalAndVIdMappingsForSequencerAndRandomizer(
+			ServiceCaller serviceCaller, VId currVId) {
 		Sequencer currSeq = currVId.getSequencer();
 		currSeq.setValue(null);
 
 		Randomizer currRan = currVId.getRandomizer();
 
 		// shuffle sequencer symbol store
-		shuffleSymbolStore(currSeq.getSymbolTable(), ThreadLocalRandom.current());
-		shuffleSymbolStore(currRan.getSymbolTable(), ThreadLocalRandom.current());
+		VIdUtility.shuffleSymbolStore(currSeq.getSymbolTable(), ThreadLocalRandom.current());
+		VIdUtility.shuffleSymbolStore(currRan.getSymbolTable(), ThreadLocalRandom.current());
 
 		serviceCaller.getSequenceGenerator().generate(currVId);
 		serviceCaller.getRandomizerGenerator().generate(currVId);
@@ -247,22 +259,6 @@ public class AdjustorAndUpdator {
 						Arrays.asList(currVId.getSequencer().getIndexToVidPlaceMappings()));
 			}
 		}
-
-	}
-
-	private void shuffleSymbolStore(Map<Integer, String> symbolTable, Random random) {
-
-		List<Integer> keys = symbolTable.keySet().stream().sorted().collect(Collectors.toList());
-
-		List<String> values = keys.stream().map(key -> symbolTable.get(key)).collect(Collectors.toList());
-
-		Collections.shuffle(values, random);
-
-		AtomicInteger index = new AtomicInteger(0);
-
-		keys.stream().forEach(key -> {
-			symbolTable.put(key, values.get(index.getAndIncrement()));
-		});
 
 	}
 

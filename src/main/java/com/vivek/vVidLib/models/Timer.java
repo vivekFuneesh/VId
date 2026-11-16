@@ -37,9 +37,13 @@ public class Timer extends CommonFields {
 
 	private int precision;
 
+	private int initialNumberOfSymbols;
+
 	/** Original value, unmodified, unprocessed, precised. */
 	private BigInteger precisedValue;
 
+	// this updates with increment in length of precisedValue =
+	// (currTIme-baseTIme)/(10^precision).
 	private BigInteger baseTime;
 
 	/**

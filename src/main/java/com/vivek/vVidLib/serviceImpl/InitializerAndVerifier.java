@@ -28,7 +28,6 @@
 
 package com.vivek.vVidLib.serviceImpl;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -45,6 +44,7 @@ import java.util.stream.IntStream;
 import org.springframework.stereotype.Component;
 
 import com.vivek.vVidLib.models.AssemblingChoice;
+import com.vivek.vVidLib.models.AssemblingChoice.ASSEMBLY_SEQUENCE;
 import com.vivek.vVidLib.models.CommonFields;
 import com.vivek.vVidLib.models.Randomizer;
 import com.vivek.vVidLib.models.Sequencer;
@@ -198,14 +198,6 @@ public class InitializerAndVerifier {
 	}
 
 	public static VId defaultInitializeVId(VId vId) {
-		if (vId == null)
-			vId = new VId();
-		if (vId.getSequencer() == null)
-			vId.setSequencer(new Sequencer());
-		if (vId.getTimer() == null)
-			vId.setTimer(new Timer());
-		if (vId.getRandomizer() == null)
-			vId.setRandomizer(new Randomizer());
 
 		defaultInitializeSequencer(vId);
 		defaultInitializeRandomizer(vId);
@@ -217,19 +209,35 @@ public class InitializerAndVerifier {
 	}
 
 	public static void defaultVIdSettings(VId vId) {
-		if (vId.getAssemblingChoice() == null)
+		if (vId.getAssemblingChoice() == null) {
 			vId.setAssemblingChoice(AssemblingChoice.MIX_TIMER_SEQUENCER_RANDOMIZER);
+		}
+		if (vId.getAssemblySequence() == null) {
+			vId.setAssemblySequence(ASSEMBLY_SEQUENCE.TSR);
+		}
 
 		if (vId.getShufflingChoiceInAssembly() == null)
 			vId.setShufflingChoiceInAssembly(ShufflingChoice.RANDOM_PLACE_MAPPINGS);
 
 		Map<String, Integer> reverseSymbolsMapping = new HashMap<>();
 
-		vId.getTimer().getSymbolTable().entrySet().stream().forEach(entry -> {
+		Map<Integer, String> finalTable = getDefaultRandomSymbolTable(32);
+
+		VIdUtility.shuffleSymbolStore(finalTable, ThreadLocalRandom.current());
+
+		finalTable.entrySet().stream().forEach(entry -> {
 			reverseSymbolsMapping.put(entry.getValue(), entry.getKey());
 		});
 
 		vId.setReverseSymbolTableMapping(reverseSymbolsMapping);
+		vId.setFinalSymbolTable(finalTable);
+
+		vId.setFinalFirstBase(vId.getFinalSymbolTable().size());
+
+		vId.setFinalSecondBase(2);
+
+		vId.setFinalBitLengthConstraint(
+				VIdUtility.calculateBitLengthConstraint(vId.getFinalFirstBase() - 1, vId.getFinalSecondBase()));
 	}
 
 	/**
@@ -256,6 +264,7 @@ public class InitializerAndVerifier {
 		if (vId.getRandomizer().getShufflingChoice() == ShufflingChoice.RANDOM_PLACE_MAPPINGS)
 			defaultInternalPlaceMappings(ran, ran.getCurrentNumberOfSymbols());
 
+		// important
 		ran.setCurrentBitsLength(VIdUtility.calculateNumberOf2ndBasedBitsFromNumberOfSymbols(
 				ran.getCurrentNumberOfSymbols(), ran.getBitLengthConstraint()));
 	}
@@ -265,9 +274,15 @@ public class InitializerAndVerifier {
 
 		setDefaultCommonFields(timer);
 
-		timer.setPrecision(0);
+		timer.setPrecision(1);
 
-		timer.setBaseTime(BigInteger.valueOf(0));// BigInteger.valueOf(Instant.now().toEpochMilli()));
+		timer.setInitialNumberOfSymbols(1);
+
+		timer.setPrecisedValue(null);
+		// not setting baseTime here as it will be set in generator upon finding
+		// precisedValue as null.
+		// timer.setBaseTime(BigInteger.valueOf(Instant.now().toEpochMilli()));
+		// //BigInteger.valueOf(0));
 
 		SynchronizingObject synchronizingObject = new SynchronizingObject();
 		synchronizingObject.setId("default-ID");
@@ -335,20 +350,22 @@ public class InitializerAndVerifier {
 		IntStream.range(48, 54).forEach(num -> {
 			set.add((char) num);
 		});
-//		set.add((char)43); //+
-//		set.add((char)45); //-
-//		set.add((char)61); //=
-//		set.add((char)64); //@
-//		set.add((char)63); //?
-//		set.add((char)59); //;
-//		set.add((char)91);
-//		set.add((char)93);
-//		set.add((char)123);
-//		set.add((char)125);
-//		set.add((char)40);
-//		set.add((char)41);
-//		set.add((char)60);
-//		set.add((char)62);
+
+		System.out.println(set.toString());
+		// set.add((char)43); //+
+		// set.add((char)45); //-
+		// set.add((char)61); //=
+		// set.add((char)64); //@
+		// set.add((char)63); //?
+		// set.add((char)59); //;
+		// set.add((char)91);
+		// set.add((char)93);
+		// set.add((char)123);
+		// set.add((char)125);
+		// set.add((char)40);
+		// set.add((char)41);
+		// set.add((char)60);
+		// set.add((char)62);
 
 		IntStream.range(97, 123).forEach(num -> {
 			set.add((char) num);

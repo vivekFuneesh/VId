@@ -31,6 +31,7 @@ package com.vivek.vVidLib.serviceImpl;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -38,6 +39,7 @@ import java.util.stream.Stream;
 
 import org.springframework.stereotype.Component;
 
+import com.vivek.vVidLib.models.AssemblingChoice.ASSEMBLY_PARTS;
 import com.vivek.vVidLib.models.CommonFields;
 import com.vivek.vVidLib.models.Randomizer;
 import com.vivek.vVidLib.models.Sequencer;
@@ -110,6 +112,10 @@ public class Assembler {
 						return VIdUtility.convertToDefaultValueFromNumber(part.getBitLengthConstraint() - bits.length(),
 								0) + bits;
 					}).collect(Collectors.joining()));
+//			System.out.println("\n seq= "+vId.getSequencer().getValueInBits() +" rect= "+vId.getSequencer().getRectifiedValueInBitsDuringAsembly()
+//					+ "\n ran= "+vId.getRandomizer().getValueInBits() +" rect= "+vId.getRandomizer().getRectifiedValueInBitsDuringAsembly()
+//					+ "\n tim= "+vId.getTimer().getValueInBits() +" rect= "+vId.getTimer().getRectifiedValueInBitsDuringAsembly()
+//					);
 
 		});
 	}
@@ -161,16 +167,16 @@ public class Assembler {
 			String result = timer.getRectifiedValueInBitsDuringAsembly() + seq.getRectifiedValueInBitsDuringAsembly();
 			result = Stream.of(VIdUtility.lsbOverMsbMixer(new char[result.length()], result)).map(String::valueOf)
 					.collect(Collectors.joining());
-			result = ran.getRectifiedValueInBitsDuringAsembly() + result;
+			result = result + ran.getRectifiedValueInBitsDuringAsembly();
 			vId.setValueInBitsPostAssembly(result);
 			break;
 		}
 		case RANDOM_PLACE_MAPPINGS: {
 			char[] result = assembleByPlaceMappings(vId, vId.getRandomizer());
 
-			vId.setValueInBitsPostAssembly((vId.getRandomizer().getRectifiedValueInBitsDuringAsembly()
-					+ IntStream.range(0, result.length).filter(num -> result[num] != 0)
-							.mapToObj(num -> String.valueOf(result[num])).collect(Collectors.joining())));
+			vId.setValueInBitsPostAssembly((IntStream.range(0, result.length).filter(num -> result[num] != 0)
+					.mapToObj(num -> String.valueOf(result[num])).collect(Collectors.joining()))
+					+ vId.getRandomizer().getRectifiedValueInBitsDuringAsembly());
 			break;
 		}
 		default:
@@ -199,14 +205,46 @@ public class Assembler {
 		return result;
 	}
 
+	// t-s-r
 	private void noMixing(VId vId) {
 
 		Timer timer = vId.getTimer();
 		Randomizer ran = vId.getRandomizer();
 		Sequencer seq = vId.getSequencer();
 
-		vId.setValueInBitsPostAssembly(ran.getRectifiedValueInBitsDuringAsembly()
-				+ seq.getRectifiedValueInBitsDuringAsembly() + timer.getRectifiedValueInBitsDuringAsembly());
+		vId.setValueInBitsPostAssembly(timer.getRectifiedValueInBitsDuringAsembly()
+				+ seq.getRectifiedValueInBitsDuringAsembly() + ran.getRectifiedValueInBitsDuringAsembly());
+
+		String temp = vId.getValueInBitsPostAssembly();
+
+		HashMap<String, CommonFields> map = new HashMap<String, CommonFields>();
+		map.put(ASSEMBLY_PARTS.T.name(), vId.getTimer());
+		map.put(ASSEMBLY_PARTS.S.name(), vId.getSequencer());
+		map.put(ASSEMBLY_PARTS.R.name(), vId.getRandomizer());
+
+		vId.setValueInBitsPostAssembly(map.get(vId.getAssemblySequence().name().substring(0, 1))
+				.getRectifiedValueInBitsDuringAsembly()
+				+ map.get(vId.getAssemblySequence().name().substring(1, 2)).getRectifiedValueInBitsDuringAsembly()
+				+ map.get(vId.getAssemblySequence().name().substring(2, 3)).getRectifiedValueInBitsDuringAsembly());
+
+		if (!temp.equals(vId.getValueInBitsPostAssembly())) {
+
+			System.out.println(vId.getAssemblySequence().name() + "\n" + timer.getRectifiedValueInBitsDuringAsembly()
+					+ "\n"
+					+ map.get(vId.getAssemblySequence().name().substring(0, 1)).getRectifiedValueInBitsDuringAsembly());
+
+			System.out.println("\n" + seq.getRectifiedValueInBitsDuringAsembly() + "\n"
+					+ map.get(vId.getAssemblySequence().name().substring(1, 2)).getRectifiedValueInBitsDuringAsembly());
+
+			System.out.println("\n" + ran.getRectifiedValueInBitsDuringAsembly() + "\n"
+					+ map.get(vId.getAssemblySequence().name().substring(2, 3)).getRectifiedValueInBitsDuringAsembly());
+
+			System.out.println("exiting.");
+			System.out.println("printing\n" + temp + "\n" + vId.getValueInBitsPostAssembly() + "\n" + map + " \n"
+					+ vId.getAssemblySequence().name().substring(2, 3) + "\n" + map.keySet());
+			System.exit(0);
+		}
+
 	}
 
 }
