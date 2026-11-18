@@ -32,6 +32,6 @@ import lombok.NoArgsConstructor;
 @EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
 public class Randomizer extends CommonFields {
-
+	
 	private BigInteger value;
 }

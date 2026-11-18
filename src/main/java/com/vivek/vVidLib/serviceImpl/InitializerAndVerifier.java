@@ -44,7 +44,6 @@ import java.util.stream.IntStream;
 import org.springframework.stereotype.Component;
 
 import com.vivek.vVidLib.models.AssemblingChoice;
-import com.vivek.vVidLib.models.AssemblingChoice.ASSEMBLY_SEQUENCE;
 import com.vivek.vVidLib.models.CommonFields;
 import com.vivek.vVidLib.models.Randomizer;
 import com.vivek.vVidLib.models.Sequencer;
@@ -212,8 +211,12 @@ public class InitializerAndVerifier {
 		if (vId.getAssemblingChoice() == null) {
 			vId.setAssemblingChoice(AssemblingChoice.MIX_TIMER_SEQUENCER_RANDOMIZER);
 		}
-		if (vId.getAssemblySequence() == null) {
-			vId.setAssemblySequence(ASSEMBLY_SEQUENCE.TSR);
+		if (vId.getAssemblingOrder() == null) {
+			Map<String, Integer> assemblingOrder = new HashMap<String, Integer>();
+			assemblingOrder.put(vId.getTimer().getIdentitySymbol(), 2);
+			assemblingOrder.put(vId.getSequencer().getIdentitySymbol(), 1);
+			assemblingOrder.put(vId.getRandomizer().getIdentitySymbol(), 3);
+			vId.setAssemblingOrder(assemblingOrder);
 		}
 
 		if (vId.getShufflingChoiceInAssembly() == null)
@@ -246,6 +249,9 @@ public class InitializerAndVerifier {
 	public static void defaultInitializeSequencer(VId vId) {
 		Sequencer seq = vId.getSequencer();
 
+		if(seq.getIdentitySymbol() == null) {
+			seq.setIdentitySymbol("S");
+		}
 		if (seq.getSeqC() == null)
 			seq.setSeqC(SequencerChoice.SLOW);
 		seq.setInitialNumberOfSymbols(1);
@@ -260,6 +266,9 @@ public class InitializerAndVerifier {
 		Randomizer ran = vId.getRandomizer();
 		ran.setCurrentNumberOfSymbols(1);
 
+		if(ran.getIdentitySymbol() == null) {
+			ran.setIdentitySymbol("R");
+		}
 		setDefaultCommonFields(ran);
 		if (vId.getRandomizer().getShufflingChoice() == ShufflingChoice.RANDOM_PLACE_MAPPINGS)
 			defaultInternalPlaceMappings(ran, ran.getCurrentNumberOfSymbols());
@@ -272,6 +281,9 @@ public class InitializerAndVerifier {
 	public static void defaultInitializeTimer(VId vId) {
 		Timer timer = vId.getTimer();
 
+		if(timer.getIdentitySymbol() == null) {
+			timer.setIdentitySymbol("T");
+		}
 		setDefaultCommonFields(timer);
 
 		timer.setPrecision(1);

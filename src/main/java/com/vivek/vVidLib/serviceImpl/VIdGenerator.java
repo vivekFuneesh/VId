@@ -177,13 +177,16 @@ public class VIdGenerator {
 			 *
 			 */
 
-			System.out.println("Loading form DB--");
+//			System.out.println("Loading form DB--");
 			currentVId = mm.map(state, VId.class);
 			currentVId.setTimer(mm.map(state.getTimerState(), Timer.class));
 			currentVId.setSequencer(mm.map(state.getSequencerState(), Sequencer.class));
 			currentVId.setRandomizer(mm.map(state.getRandomizerState(), Randomizer.class));
-
-			// putting default value for the time being..
+//			System.out.println("loaded assembling order is = "+ currentVId.getAssemblingOrder()+
+//					"\ntimer ="+currentVId.getTimer().getIdentitySymbol()+
+//					"\nsequencer="+currentVId.getSequencer().getIdentitySymbol()+
+//					"\nrandomizer="+currentVId.getRandomizer().getIdentitySymbol());
+//			 putting default value for the time being..
 			SynchronizingObject synchronizingObject = new SynchronizingObject();
 			synchronizingObject.setId("default-ID");
 			currentVId.getTimer().setSynchronizingObject(synchronizingObject);

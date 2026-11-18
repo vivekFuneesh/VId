@@ -31,15 +31,19 @@ package com.vivek.vVidLib.serviceImpl;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import org.springframework.stereotype.Component;
 
-import com.vivek.vVidLib.models.AssemblingChoice.ASSEMBLY_PARTS;
+import com.vivek.vVidLib.models.AssemblingChoice.MIXABLE;
+import com.vivek.vVidLib.models.AssemblingChoice;
 import com.vivek.vVidLib.models.CommonFields;
 import com.vivek.vVidLib.models.Randomizer;
 import com.vivek.vVidLib.models.Sequencer;
@@ -62,11 +66,18 @@ public class Assembler {
 //				" "+ vId.getRandomizer().getValueInBits());
 //		System.out.println("Timer: prec, actual: "+ vId.getTimer().getPrecisedValue()+" "+ vId.getTimer().getActualValue()+" "
 //				+ " Sequencer: "+ vId.getSequencer().getValue());
-		rectifyIndividualSymbolTableMappings(vId);
+		
+		
+		/**
+		 * call assembly functions only for those allParts whih are active i.e. assemblingOrder !=-1
+		*/
+		List<CommonFields> parts= Arrays.asList(vId.getTimer(), vId.getSequencer(), vId.getRandomizer());
+		
+		remapAllPartsValuesToVIdSymbolTable(vId, parts);
 
 		switch (vId.getAssemblingChoice()) {
 		case NO_MIXING:
-			noMixing(vId);
+			noMixing(vId, parts);
 			break;
 		case MIX_ONLY_TIMER_SEQUENCER:
 			mixOnlyTimerAndSequencer(vId);
@@ -85,41 +96,63 @@ public class Assembler {
 	 * This also plays a little part of symbolMapper (while deciding a random symbol
 	 * from a given list)!
 	 */
-	private void rectifyIndividualSymbolTableMappings(VId vId) {
-		List<CommonFields> parts = Arrays.asList(vId.getTimer(), vId.getSequencer(), vId.getRandomizer());
-
-		parts.stream().forEach(part -> {
+	private void remapAllPartsValuesToVIdSymbolTable(VId vId, List<CommonFields> parts) {
+		
+		parts.stream()
+			.filter(part->vId.getAssemblingOrder().get(part.getIdentitySymbol()).intValue()!=-1)
+			.forEach(part -> {
 
 			List<String> indicesInFinalTable = new ArrayList<>();
-
+//			System.out.println("Processing "+part.hashCode()+"->"+ part+"\n"
+//					+"but vId timer part is:"+"\n"+
+//					vId.getTimer().hashCode()+"->"+vId.getTimer());
 			List<String> indicesInLocalTable = VIdUtility.convertTo1stBasedListOfNumbersFromBitsWithSecondBase(
 					part.getValueInBits(), part.getBitLengthConstraint(), part.getSecondBase());
-			// System.out.println(indicesInLocalTable+" \n"+ part.getValueInBits()+" \n
-			// bitLenConstraint: " + part.getBitLengthConstraint());
+//			 System.out.println(indicesInLocalTable+" \n"+ part.getValueInBits()+" \n "
+//			 		+ "bitLenConstraint: " + part.getBitLengthConstraint());
 
 			indicesInLocalTable.stream().forEach(index -> {
 				String symbols = part.getSymbolTable().get(Integer.valueOf(index));
-				// System.out.println("Calling for "+ symbols +" symbolTable size="
-				// +part.getSymbolTable().size());
+//				 System.out.println("Calling for "+ symbols +" symbolTable size="
+//				 +part.getSymbolTable().size());
 				indicesInFinalTable.add("" + vId.getReverseSymbolTableMapping().get(symbols));
 
 			});
 
-			part.setRectifiedValueInBitsDuringAsembly(indicesInFinalTable.stream()
+			part.setRemappedValueInBitsToVIdSymbolTableInAssembly(indicesInFinalTable.stream()
 					.map(str -> VIdUtility.convertToBitsWithBaseFromNumbers(new BigInteger(str),
 							BigInteger.valueOf(part.getSecondBase())).stream().collect(Collectors.joining()))
 					.map(bits -> {
 						return VIdUtility.convertToDefaultValueFromNumber(part.getBitLengthConstraint() - bits.length(),
 								0) + bits;
 					}).collect(Collectors.joining()));
-//			System.out.println("\n seq= "+vId.getSequencer().getValueInBits() +" rect= "+vId.getSequencer().getRectifiedValueInBitsDuringAsembly()
-//					+ "\n ran= "+vId.getRandomizer().getValueInBits() +" rect= "+vId.getRandomizer().getRectifiedValueInBitsDuringAsembly()
-//					+ "\n tim= "+vId.getTimer().getValueInBits() +" rect= "+vId.getTimer().getRectifiedValueInBitsDuringAsembly()
+//			System.out.println("\n seq= "+vId.getSequencer().getValueInBits() +" rect= "+vId.getSequencer().getRemappedValueInBitsToVIdSymbolTableInAsembly()
+//					+ "\n ran= "+vId.getRandomizer().getValueInBits() +" rect= "+vId.getRandomizer().getRemappedValueInBitsToVIdSymbolTableInAsembly()
+//					+ "\n tim= "+vId.getTimer().getValueInBits() +" rect= "+vId.getTimer().getRemappedValueInBitsToVIdSymbolTableInAsembly()
 //					);
 
 		});
 	}
 
+	
+	private void mixAndAssemble(VId vId) {
+		
+		//shift through mixable and assemblingOrder!=-1 (means active) 
+		//case 0 mixable then call NO  MIXING
+		//case 2 mixable then mix then using LSB over mSB mixer and concatenate others according to assemblingOrder
+		//case 3 or more :
+		//		if Randomizer is active then 
+		//				spread randomizer over other components
+		//				use lsb over msb mixer in individual spreaded parts
+		//				concatenate them according to individual part's assembling order
+		//				use lsb over msb mixer on whole
+		//				
+		//			
+		
+		
+	}
+	
+	
 	private void mixAll(VId vId) {
 
 		Timer timer = vId.getTimer();
@@ -128,10 +161,10 @@ public class Assembler {
 
 		switch (vId.getShufflingChoiceInAssembly()) {
 		case FIXED_POSITIONS: {
-			String part1 = timer.getRectifiedValueInBitsDuringAsembly() + ran.getRectifiedValueInBitsDuringAsembly()
-					.substring(0, ran.getRectifiedValueInBitsDuringAsembly().length() / 2);
-			String part2 = seq.getRectifiedValueInBitsDuringAsembly() + ran.getRectifiedValueInBitsDuringAsembly()
-					.substring(ran.getRectifiedValueInBitsDuringAsembly().length() / 2);
+			String part1 = timer.getRemappedValueInBitsToVIdSymbolTableInAssembly() + ran.getRemappedValueInBitsToVIdSymbolTableInAssembly()
+					.substring(0, ran.getRemappedValueInBitsToVIdSymbolTableInAssembly().length() / 2);
+			String part2 = seq.getRemappedValueInBitsToVIdSymbolTableInAssembly() + ran.getRemappedValueInBitsToVIdSymbolTableInAssembly()
+					.substring(ran.getRemappedValueInBitsToVIdSymbolTableInAssembly().length() / 2);
 
 			part1 = Stream.of(VIdUtility.lsbOverMsbMixer(new char[part1.length()], part1)).map(String::valueOf)
 					.collect(Collectors.joining());
@@ -156,6 +189,64 @@ public class Assembler {
 		}
 	}
 
+	private void mixOnlyTwoParts(VId vId, List<CommonFields> allParts) {
+		
+		
+		int count = (int)allParts.stream().filter(part->part.isToBeMixed()).count();
+		if( count>=3 && 
+				allParts.stream().anyMatch(part->part.isToBeMixed() && 
+						part.getIdentitySymbol().equals(vId.getRandomizer().getIdentitySymbol())) 
+				) {
+			
+		}
+		
+		AtomicInteger lowestOrderInMixed = new AtomicInteger(Integer.MAX_VALUE);
+		
+		
+		
+		//1st concatenate parts that are to be mixed with each other
+		String result = allParts.stream().filter(part->part.isToBeMixed())
+		.sorted((a,b)->{
+			lowestOrderInMixed.set(Math.min(
+						Math.min(vId.getAssemblingOrder().get(b.getIdentitySymbol()).intValue(), 
+					vId.getAssemblingOrder().get(a.getIdentitySymbol()).intValue()), lowestOrderInMixed.get()
+											)
+									);
+			return vId.getAssemblingOrder().get(a.getIdentitySymbol()).intValue() -
+				vId.getAssemblingOrder().get(b.getIdentitySymbol()).intValue();
+		})
+		.map(part->part.getRemappedValueInBitsToVIdSymbolTableInAssembly())
+		.collect(Collectors.joining());
+		
+		//mix all of these 
+		switch (vId.getShufflingChoiceInAssembly()) {
+			case FIXED_POSITIONS: {
+				result = Stream.of(VIdUtility.lsbOverMsbMixer(new char[result.length()], result)).map(String::valueOf)
+						.collect(Collectors.joining());
+				break;
+			}
+			case RANDOM_PLACE_MAPPINGS: {
+				
+				break;
+			}
+		}
+		//now concatenate as : take lowest assemblingOrder from mixed ones and concatenate with others on ass.Order basis
+		
+		
+		List<String> finalList = new ArrayList<>();
+		
+		result = Stream.concat(allParts.stream().filter(part->!part.isToBeMixed())
+		.map(part-> 
+		List.of(part.getRemappedValueInBitsToVIdSymbolTableInAssembly(),
+				vId.getAssemblingOrder().get(part.getIdentitySymbol()).intValue()))
+		, Stream.of(List.of(result,lowestOrderInMixed.get())))
+		.sorted((a,b)->(Integer)a.get(1)-(Integer)b.get(1))
+		.map(x->(String)x.get(0))
+		.collect(Collectors.joining());
+		
+		
+	}
+	
 	private void mixOnlyTimerAndSequencer(VId vId) {
 
 		Timer timer = vId.getTimer();
@@ -164,10 +255,10 @@ public class Assembler {
 
 		switch (vId.getShufflingChoiceInAssembly()) {
 		case FIXED_POSITIONS: {
-			String result = timer.getRectifiedValueInBitsDuringAsembly() + seq.getRectifiedValueInBitsDuringAsembly();
+			String result = timer.getRemappedValueInBitsToVIdSymbolTableInAssembly() + seq.getRemappedValueInBitsToVIdSymbolTableInAssembly();
 			result = Stream.of(VIdUtility.lsbOverMsbMixer(new char[result.length()], result)).map(String::valueOf)
 					.collect(Collectors.joining());
-			result = result + ran.getRectifiedValueInBitsDuringAsembly();
+			result = result + ran.getRemappedValueInBitsToVIdSymbolTableInAssembly();
 			vId.setValueInBitsPostAssembly(result);
 			break;
 		}
@@ -176,7 +267,7 @@ public class Assembler {
 
 			vId.setValueInBitsPostAssembly((IntStream.range(0, result.length).filter(num -> result[num] != 0)
 					.mapToObj(num -> String.valueOf(result[num])).collect(Collectors.joining()))
-					+ vId.getRandomizer().getRectifiedValueInBitsDuringAsembly());
+					+ vId.getRandomizer().getRemappedValueInBitsToVIdSymbolTableInAssembly());
 			break;
 		}
 		default:
@@ -199,51 +290,64 @@ public class Assembler {
 		List<CommonFields> partsOfVId = Arrays.asList(timer, seq, ran);
 		partsOfVId.stream().filter(part -> part != partToFilter).forEach(part -> {
 			part.getIndexToVidPlaceMappings().entrySet().stream().forEach(entry -> {
-				result[entry.getValue()] = part.getRectifiedValueInBitsDuringAsembly().charAt(entry.getKey());
+//				System.out.println(entry.getKey()+"->"+entry.getValue()+
+//						"\n"+part.getRemappedValueInBitsToVIdSymbolTableInAsembly());
+
+				result[entry.getValue()] = part.getRemappedValueInBitsToVIdSymbolTableInAssembly().charAt(entry.getKey());
 			});
 		});
 		return result;
 	}
 
 	// t-s-r
-	private void noMixing(VId vId) {
+	private void noMixing(VId vId, List<CommonFields> parts) {
 
-		Timer timer = vId.getTimer();
-		Randomizer ran = vId.getRandomizer();
-		Sequencer seq = vId.getSequencer();
+//		Timer timer = vId.getTimer();
+//		Randomizer ran = vId.getRandomizer();
+//		Sequencer seq = vId.getSequencer();
 
-		vId.setValueInBitsPostAssembly(timer.getRectifiedValueInBitsDuringAsembly()
-				+ seq.getRectifiedValueInBitsDuringAsembly() + ran.getRectifiedValueInBitsDuringAsembly());
+//		vId.setValueInBitsPostAssembly(timer.getRemappedValueInBitsToVIdSymbolTableInAsembly()
+//				+ seq.getRemappedValueInBitsToVIdSymbolTableInAsembly() + ran.getRemappedValueInBitsToVIdSymbolTableInAsembly());
 
-		String temp = vId.getValueInBitsPostAssembly();
+//		String temp = vId.getValueInBitsPostAssembly();
+		
+		
+		vId.setValueInBitsPostAssembly(parts.stream()
+		.filter(part->vId.getAssemblingOrder().get(part.getIdentitySymbol()).intValue()!=-1)
+		.sorted((a,b)->vId.getAssemblingOrder().get(a.getIdentitySymbol()).intValue() -
+				vId.getAssemblingOrder().get(b.getIdentitySymbol()).intValue())
+		.map(part-> part.getRemappedValueInBitsToVIdSymbolTableInAssembly())
+		.collect(Collectors.joining())
+		);
+//		System.out.println(vId.getTimer().getRemappedValueInBitsToVIdSymbolTableInAsembly()+" "+
+//		vId.getSequencer().getRemappedValueInBitsToVIdSymbolTableInAsembly()+" "+
+//				vId.getRandomizer().getRemappedValueInBitsToVIdSymbolTableInAsembly()+"\n"+
+//				vId.getValueInBitsPostAssembly()+"\n"+
+//				temp);
+		//ASSEMBLING_ORDER.values()[]
+//
+//		vId.setValueInBitsPostAssembly(map.get(vId.getAssemblySequence().name().substring(0, 1))
+//				.getRemappedValueInBitsToVIdSymbolTableInAsembly()
+//				+ map.get(vId.getAssemblySequence().name().substring(1, 2)).getRemappedValueInBitsToVIdSymbolTableInAsembly()
+//				+ map.get(vId.getAssemblySequence().name().substring(2, 3)).getRemappedValueInBitsToVIdSymbolTableInAsembly());
 
-		HashMap<String, CommonFields> map = new HashMap<String, CommonFields>();
-		map.put(ASSEMBLY_PARTS.T.name(), vId.getTimer());
-		map.put(ASSEMBLY_PARTS.S.name(), vId.getSequencer());
-		map.put(ASSEMBLY_PARTS.R.name(), vId.getRandomizer());
-
-		vId.setValueInBitsPostAssembly(map.get(vId.getAssemblySequence().name().substring(0, 1))
-				.getRectifiedValueInBitsDuringAsembly()
-				+ map.get(vId.getAssemblySequence().name().substring(1, 2)).getRectifiedValueInBitsDuringAsembly()
-				+ map.get(vId.getAssemblySequence().name().substring(2, 3)).getRectifiedValueInBitsDuringAsembly());
-
-		if (!temp.equals(vId.getValueInBitsPostAssembly())) {
-
-			System.out.println(vId.getAssemblySequence().name() + "\n" + timer.getRectifiedValueInBitsDuringAsembly()
-					+ "\n"
-					+ map.get(vId.getAssemblySequence().name().substring(0, 1)).getRectifiedValueInBitsDuringAsembly());
-
-			System.out.println("\n" + seq.getRectifiedValueInBitsDuringAsembly() + "\n"
-					+ map.get(vId.getAssemblySequence().name().substring(1, 2)).getRectifiedValueInBitsDuringAsembly());
-
-			System.out.println("\n" + ran.getRectifiedValueInBitsDuringAsembly() + "\n"
-					+ map.get(vId.getAssemblySequence().name().substring(2, 3)).getRectifiedValueInBitsDuringAsembly());
-
-			System.out.println("exiting.");
-			System.out.println("printing\n" + temp + "\n" + vId.getValueInBitsPostAssembly() + "\n" + map + " \n"
-					+ vId.getAssemblySequence().name().substring(2, 3) + "\n" + map.keySet());
-			System.exit(0);
-		}
+//		if (!temp.equals(vId.getValueInBitsPostAssembly())) {
+//			System.out.println("no-mixing assembled are not same..");
+//			System.out.println(vId.getAssemblySequence().name() + "\n" + timer.getRemappedValueInBitsToVIdSymbolTableInAsembly()
+//					+ "\n"
+//					+ map.get(vId.getAssemblySequence().name().substring(0, 1)).getRemappedValueInBitsToVIdSymbolTableInAsembly());
+//
+//			System.out.println("\n" + seq.getRemappedValueInBitsToVIdSymbolTableInAsembly() + "\n"
+//					+ map.get(vId.getAssemblySequence().name().substring(1, 2)).getRemappedValueInBitsToVIdSymbolTableInAsembly());
+//
+//			System.out.println("\n" + ran.getRemappedValueInBitsToVIdSymbolTableInAsembly() + "\n"
+//					+ map.get(vId.getAssemblySequence().name().substring(2, 3)).getRemappedValueInBitsToVIdSymbolTableInAsembly());
+//
+//			System.out.println("exiting.");
+//			System.out.println("printing\n" + temp + "\n" + vId.getValueInBitsPostAssembly() + "\n" + map + " \n"
+//					+ vId.getAssemblySequence().name().substring(2, 3) + "\n" + map.keySet());
+//			System.exit(0);
+//		}
 
 	}
 

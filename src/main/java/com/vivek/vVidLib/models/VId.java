@@ -24,8 +24,6 @@ package com.vivek.vVidLib.models;
 
 import java.util.Map;
 
-import com.vivek.vVidLib.models.AssemblingChoice.ASSEMBLY_SEQUENCE;
-
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -33,8 +31,6 @@ import lombok.NoArgsConstructor;
  * VIdGenerator or client must use synchronized calls to every getNextId()
  * otherwise IDs would be inconsistent state!
  * 
- * As further extension, can also use a separate symbolTable for VId that can
- * also be shuffled upon length changes.
  */
 @Data
 @NoArgsConstructor
@@ -56,8 +52,6 @@ public class VId {
 
 	private AssemblingChoice assemblingChoice;
 
-	private ASSEMBLY_SEQUENCE assemblySequence;
-
 	private ShufflingChoice shufflingChoiceInAssembly;
 
 	private Timer timer;
@@ -68,10 +62,19 @@ public class VId {
 
 	/**
 	 * For a given symbol, where is it present in final symbol table. Constant,
-	 * Unmodified.
+	 * Unmodified, non-shuffled table.
 	 */
 	private Map<String, Integer> reverseSymbolTableMapping;
 
 	private Map<Integer, String> finalSymbolTable;
+	
+	/**If a certain part is not active (means not a part of generation itself) then keep 
+	 * order value to be -1.
+	 * Keep default order as TSR.
+	 * Order 1 is First sequence, 2 is 2nd sequence.. so on.
+	 * Symbols T for timer, S for Sequencer, R for Randomizer
+	 * */
+	private Map<String, Integer> assemblingOrder;
+	
 
 }

@@ -22,19 +22,40 @@
 
 package com.vivek.vVidLib.models;
 
+import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.Map;
+
+import lombok.Getter;
+import lombok.Setter;
+
 public enum AssemblingChoice {
+	
 	NO_MIXING, // TBD: IT CAN CONTAIN UPTO 6 USER-DEFINED SCENARIOS: random-timer-sequencer,
 				// r-s-t, t-s-r, t-r-s, s-t-r, s-r-t.
 	MIX_ONLY_TIMER_SEQUENCER, // IT can be R-(ts) or (ts)-Random or (st)-R or R-(st)
 
 	MIX_TIMER_SEQUENCER_RANDOMIZER;
 
-	public enum ASSEMBLY_PARTS {
-		T, S, R;
+	/**
+	 * True - to be mixed in assembly, false- not to be mixed in assembly. Flase means it is to 
+	 * be attached as-it-is in VId during assembly at the position determined by 
+	 * assemblyOrder.
+	 * */
+	@Getter
+	public enum MIXABLE{
+		
+		NO_MIX(false), //Special Case
+		//set value as false if corresponding part is not to be mixed in assembly.
+		T(true),
+		S(true),
+		R(true);
+		private boolean flag;
+		
+		MIXABLE(boolean flag) {
+			this.flag = flag;
+		}
 	}
-
-	public enum ASSEMBLY_SEQUENCE {
-		TSR, TRS, STR, SRT, RTS, RST;
-
-	}
+	
+	
 }
