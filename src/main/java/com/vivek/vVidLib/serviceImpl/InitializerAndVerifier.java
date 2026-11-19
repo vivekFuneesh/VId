@@ -249,6 +249,8 @@ public class InitializerAndVerifier {
 	public static void defaultInitializeSequencer(VId vId) {
 		Sequencer seq = vId.getSequencer();
 
+		seq.setToBeMixed(true);
+		
 		if(seq.getIdentitySymbol() == null) {
 			seq.setIdentitySymbol("S");
 		}
@@ -264,6 +266,8 @@ public class InitializerAndVerifier {
 
 	public static void defaultInitializeRandomizer(VId vId) {
 		Randomizer ran = vId.getRandomizer();
+		
+		ran.setToBeMixed(false);
 		ran.setCurrentNumberOfSymbols(1);
 
 		if(ran.getIdentitySymbol() == null) {
@@ -281,6 +285,8 @@ public class InitializerAndVerifier {
 	public static void defaultInitializeTimer(VId vId) {
 		Timer timer = vId.getTimer();
 
+		timer.setToBeMixed(true);
+		
 		if(timer.getIdentitySymbol() == null) {
 			timer.setIdentitySymbol("T");
 		}

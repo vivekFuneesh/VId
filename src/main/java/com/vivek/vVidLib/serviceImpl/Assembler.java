@@ -68,14 +68,14 @@ public class Assembler {
 //				+ " Sequencer: "+ vId.getSequencer().getValue());
 
 		/**
-		 * call assembly functions only for those allParts whih are active i.e.
+		 * call assembly functions only for those allParts which are active i.e.
 		 * assemblingOrder !=-1
 		 */
 		List<CommonFields> parts = Arrays.asList(vId.getTimer(), vId.getSequencer(), vId.getRandomizer());
 
 		remapAllPartsValuesToVIdSymbolTable(vId, parts);
-
-		switch (vId.getAssemblingChoice()) {
+		mixOnlyTwoParts(vId, parts);
+		/*switch (vId.getAssemblingChoice()) {
 		case NO_MIXING:
 			noMixing(vId, parts);
 			break;
@@ -88,6 +88,7 @@ public class Assembler {
 		default:
 			throw new RuntimeException("Invalid Option for Assembly");
 		}
+		*/
 		vId.setBitsLengthPostAssembly(vId.getValueInBitsPostAssembly().length());
 
 	}
@@ -191,8 +192,8 @@ public class Assembler {
 	}
 
 	private String getRandomizerSubstring(String randomizerBits, int totalParts, AtomicInteger i) {
-		return randomizerBits.substring((randomizerBits.length() / (totalParts - 1)) * i.get(),
-				(randomizerBits.length() / (totalParts - 1)) * (1 + i.get()));
+		return randomizerBits.substring((i.get() * randomizerBits.length() / (totalParts - 1)),
+				((1 + i.get()) * randomizerBits.length() / (totalParts - 1)));
 	}
 
 	private int incOrderEval(VId vId, CommonFields a, CommonFields b) {
@@ -220,13 +221,16 @@ public class Assembler {
 			 * 		if mixable is randomizer too
 			 * 			append randomizer to other mixable parts on basis of assemblingOrder
 			 * 			lsb_Over_msb appended individual parts
+			 * 		else 
+			 * 			lsb_Over_msb mix mixable individual parts
 			 * 		append mixables on basis of assemblingOrder (take lowest order from -if already randomized- parts). 
-			 * 		lsb_Over_msb appended parts
+			 * 		lsb_Over_msb of all appended parts as whole.
 			 * append non-mixables and mixed_ones on basis of assembling order (take lowest from mixed_ones).
 			 * */
 			if (count >= 2) {
 				if (allParts.stream().anyMatch(part -> part.isToBeMixed()
 						&& part.getIdentitySymbol().equals(vId.getRandomizer().getIdentitySymbol()))) {
+
 					AtomicInteger i = new AtomicInteger(0);
 
 					String randomizerBits = vId.getRandomizer().getRemappedValueInBitsToVIdSymbolTableInAssembly();
@@ -245,25 +249,33 @@ public class Assembler {
 										? part.getRemappedValueInBitsToVIdSymbolTableInAssembly() + str
 										: str + part.getRemappedValueInBitsToVIdSymbolTableInAssembly();
 							})
-
+//							.peek(str->{System.out.println(str+"="+str.length());})
 							.map(str -> new String(VIdUtility.lsbOverMsbMixer(new char[str.length()], str)))
 							.collect(Collectors.joining());
 				} else {
 					result = allParts.stream().filter(part -> part.isToBeMixed()).sorted((a, b) -> {
 						lowestOrderInMixed.set(Math.min(getMin(vId, a, b), lowestOrderInMixed.get()));
 						return incOrderEval(vId, a, b);
-					}).map(part -> part.getRemappedValueInBitsToVIdSymbolTableInAssembly())
-							.collect(Collectors.joining());
+					}).map(part -> {
+						String str = part.getRemappedValueInBitsToVIdSymbolTableInAssembly();
+						return new String(VIdUtility.lsbOverMsbMixer(new char[str.length()], str));
+					}).collect(Collectors.joining());
 				}
 				result = new String(VIdUtility.lsbOverMsbMixer(new char[result.length()], result));
+			} else if (count == 1) {// edge case, though validation api should filter this out.
+				result = allParts.stream().filter(part -> part.isToBeMixed()).map(part -> {
+					lowestOrderInMixed.set(vId.getAssemblingOrder().get(part.getIdentitySymbol()));
+					String str = part.getRemappedValueInBitsToVIdSymbolTableInAssembly();
+					return new String(VIdUtility.lsbOverMsbMixer(new char[str.length()], str));
+				}).findFirst().get();
+				
 			}
 
 			result = Stream
 					.concat(allParts.stream().filter(part -> !part.isToBeMixed())
 							.map(part -> List.of(part.getRemappedValueInBitsToVIdSymbolTableInAssembly(),
 									vId.getAssemblingOrder().get(part.getIdentitySymbol()).intValue())),
-							result.length() >= 1 ? Stream.of(List.of(result, lowestOrderInMixed.get()))
-									: Stream.empty())
+							Stream.of(List.of(result, lowestOrderInMixed.get())))
 					.sorted((a, b) -> (Integer) a.get(1) - (Integer) b.get(1)).map(x -> (String) x.get(0))
 					.collect(Collectors.joining());
 
@@ -355,7 +367,6 @@ public class Assembler {
 //		String temp = vId.getValueInBitsPostAssembly();
 
 		vId.setValueInBitsPostAssembly(parts.stream()
-				.filter(part -> vId.getAssemblingOrder().get(part.getIdentitySymbol()).intValue() != -1)
 				.sorted((a, b) -> vId.getAssemblingOrder().get(a.getIdentitySymbol()).intValue()
 						- vId.getAssemblingOrder().get(b.getIdentitySymbol()).intValue())
 				.map(part -> part.getRemappedValueInBitsToVIdSymbolTableInAssembly()).collect(Collectors.joining()));

@@ -155,7 +155,7 @@ class VVidLibApplicationTests {
 	@Test
 	@Order(6)
 	void testSP1Fi() {
-		repo.deleteAll();
+		//repo.deleteAll();
 		dto.setSaveIntoFile("SP1Fi");
 		dto.setSequencerChoice(SequencerChoice.SLOW);
 		dto.setAssemblingChoice(AssemblingChoice.MIX_ONLY_TIMER_SEQUENCER);
