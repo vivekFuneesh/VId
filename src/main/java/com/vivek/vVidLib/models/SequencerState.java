@@ -40,5 +40,6 @@ public class SequencerState {
 	private Map<Integer, Integer> indexToVidPlaceMappings;
 	private ShufflingChoice shufflingChoice;
 	private SequencerChoice seqC;
+	private Boolean toBeMixedInAssembly;
 
 }

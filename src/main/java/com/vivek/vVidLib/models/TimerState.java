@@ -42,6 +42,7 @@ public class TimerState {
 	private Map<Integer, Integer> bitsInternalPlaceMappings;
 	private Map<Integer, Integer> indexToVidPlaceMappings;
 	private ShufflingChoice shufflingChoice;
+	private Boolean toBeMixedInAssembly;
 
 	/**
 	 * Not saving this obj as it needs to be live (live session, live context etc.),

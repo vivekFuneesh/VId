@@ -50,7 +50,7 @@ public class VId {
 
 	private int finalFirstBase;
 
-	private AssemblingChoice assemblingChoice;
+	// private AssemblingChoice assemblingChoice;
 
 	private ShufflingChoice shufflingChoiceInAssembly;
 
@@ -67,14 +67,11 @@ public class VId {
 	private Map<String, Integer> reverseSymbolTableMapping;
 
 	private Map<Integer, String> finalSymbolTable;
-	
-	/**If a certain part is not active (means not a part of generation itself) then keep 
-	 * order value to be -1.
-	 * Keep default order as TSR.
+
+	/**
 	 * Order 1 is First sequence, 2 is 2nd sequence.. so on.
 	 * Symbols T for timer, S for Sequencer, R for Randomizer
 	 * */
 	private Map<String, Integer> assemblingOrder;
-	
 
 }

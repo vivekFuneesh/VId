@@ -46,7 +46,7 @@ public class VIdState {
 	private int finalSecondBase;
 	private int finalFirstBase;
 
-	private AssemblingChoice assemblingChoice;
+	// private AssemblingChoice assemblingChoice;
 	private ShufflingChoice shufflingChoiceInAssembly;
 
 	private Map<String, Integer> reverseSymbolTableMapping;

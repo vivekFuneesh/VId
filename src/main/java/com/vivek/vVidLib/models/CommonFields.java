@@ -31,8 +31,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class CommonFields {
 	private String identitySymbol;
-	
-	private boolean toBeMixed;
+
+	private Boolean toBeMixedInAssembly;
 
 	// value in bits form in 2nd base.
 	private String valueInBits;

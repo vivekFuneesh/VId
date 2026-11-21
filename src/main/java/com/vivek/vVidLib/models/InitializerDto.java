@@ -22,6 +22,8 @@
 
 package com.vivek.vVidLib.models;
 
+import java.util.Map;
+
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
@@ -42,10 +44,16 @@ public class InitializerDto {
 
 	private ShufflingChoice shufflingChoiceInAssembly;
 
-	private AssemblingChoice assemblingChoice;
+	// private AssemblingChoice assemblingChoice;
 
 	private ShufflingChoice timerShufflingChoice;
 	private ShufflingChoice sequencerShufflingChoice;
 	private ShufflingChoice randomizerShufflingChoice;
+	private Boolean mixTimerInAssembly;
+	private Boolean mixSequencerInAssembly;
+	private Boolean mixRandomizerInAssembly;
+
+	private Map<String, Integer> assemblingOrder;
+
 	private String saveIntoFile;
 }

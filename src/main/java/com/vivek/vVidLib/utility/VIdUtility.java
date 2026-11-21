@@ -131,7 +131,8 @@ public class VIdUtility {
 		return sb.toString();
 	}
 
-	// TODO: modify to cover domain of 0 as m.s.b too, i.e. 8 with base 8 -> 00, not
+	// TODO: try to modify to cover domain of 0 as m.s.b too, i.e. 8 with base 8 ->
+	// 00, not
 	// 10.
 	public static List<String> convertToBitsWithBaseFromNumbers(BigInteger number, BigInteger base) {
 		ArrayList<String> result = new ArrayList<>();

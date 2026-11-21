@@ -39,5 +39,6 @@ public class RandomizerState {
 	private Map<Integer, Integer> bitsInternalPlaceMappings;
 	private Map<Integer, Integer> indexToVidPlaceMappings;
 	private ShufflingChoice shufflingChoice;
+	private Boolean toBeMixedInAssembly;
 
 }

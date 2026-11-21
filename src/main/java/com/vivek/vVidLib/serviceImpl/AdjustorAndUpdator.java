@@ -29,12 +29,11 @@
 package com.vivek.vVidLib.serviceImpl;
 
 import java.math.BigInteger;
-import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 import org.springframework.stereotype.Component;
 
-import com.vivek.vVidLib.models.AssemblingChoice;
 import com.vivek.vVidLib.models.CommonFields;
 import com.vivek.vVidLib.models.Randomizer;
 import com.vivek.vVidLib.models.Sequencer;
@@ -65,7 +64,7 @@ public class AdjustorAndUpdator {
 	 * If length is incrementing then internalPlaceMappings to include more mappings
 	 * for new digit (digit-wise or bitwise) and in VIdPlaceMappings.
 	 */
-	public void process(ServiceCaller sc, VId currVId, VId oldVId) {
+	public void process(ServiceCaller sc, VId currVId, VId oldVId, List<CommonFields> parts) {
 
 		Timer currTimer = currVId.getTimer();
 
@@ -84,7 +83,7 @@ public class AdjustorAndUpdator {
 			 * places )
 			 */
 
-			handleIncrementInTimerValueWithLengthCheck(sc, currVId, oldVId);
+			handleIncrementInTimerValueWithLengthCheck(sc, currVId, oldVId, parts);
 
 		} else if (oldVId.getSequencer().getCurrentBitsLength() < currVId.getSequencer().getCurrentBitsLength()) {
 
@@ -105,7 +104,7 @@ public class AdjustorAndUpdator {
 							- currTimer.getActualValue().longValueExact();
 					try {
 						synchronized (currVId.getTimer().getSynchronizingObject()) {
-							System.out.println("Waiting for " + waitTime + " milliSeconds");
+//							System.out.println("Waiting for " + waitTime + " milliSeconds");
 							if (waitTime > 0) {
 //								System.out.println("\n--waiting\n");
 								currVId.getTimer().getSynchronizingObject().wait(waitTime);
@@ -123,7 +122,7 @@ public class AdjustorAndUpdator {
 				// length to that in old.
 
 //				System.out.println("out of wait");
-				handleIncrementInTimerValueWithLengthCheck(sc, currVId, oldVId);
+				handleIncrementInTimerValueWithLengthCheck(sc, currVId, oldVId, parts);
 
 			} else {
 				/*
@@ -134,8 +133,9 @@ public class AdjustorAndUpdator {
 				// both 1 and 2 except for the changes in length of sequencer in 1
 				currVId.getSequencer().setInitialNumberOfSymbols(currVId.getSequencer().getCurrentNumberOfSymbols());
 
-				resetRegenerateReshuffleAndRemapOfInternalAndVIdMappingsForSequencerAndRandomizer(sc, currVId);
-				shuffleTimer(sc, currVId);
+				resetRegenerateReshuffleAndRemapOfInternalAndVIdMappingsForNonTimerParts(sc, currVId,
+						parts.stream().filter(part -> part != currVId.getTimer()).toList());
+				shuffleTimer(sc, currVId, parts);
 
 			}
 		}
@@ -149,10 +149,12 @@ public class AdjustorAndUpdator {
 	 * later. Ensure which symbols have been mapped to a particular place, to
 	 * properly exhaust complete domain as well.
 	 */
-	private void handleIncrementInTimerValueWithLengthCheck(ServiceCaller serviceCaller, VId currVId, VId oldVId) {
+	private void handleIncrementInTimerValueWithLengthCheck(ServiceCaller serviceCaller, VId currVId, VId oldVId,
+			List<CommonFields> parts) {
 		// System.out.println(currVId.getSequencer().getValue());
 		currVId.getSequencer().setInitialNumberOfSymbols(oldVId.getSequencer().getCurrentNumberOfSymbols());
-		resetRegenerateReshuffleAndRemapOfInternalAndVIdMappingsForSequencerAndRandomizer(serviceCaller, currVId);
+		resetRegenerateReshuffleAndRemapOfInternalAndVIdMappingsForNonTimerParts(serviceCaller, currVId,
+				parts.stream().filter(part -> part != currVId.getTimer()).toList());
 
 		if (oldVId.getTimer().getCurrentNumberOfSymbols() < currVId.getTimer().getCurrentNumberOfSymbols()) {
 
@@ -161,7 +163,7 @@ public class AdjustorAndUpdator {
 			// shuffle timer symbol store, reallocate positions in VId, reshuffle with new
 			// place mappings within(if applicable)
 
-			shuffleTimer(serviceCaller, currVId);
+			shuffleTimer(serviceCaller, currVId, parts);
 
 		} else if (oldVId.getTimer().getCurrentBitsLength() != currVId.getTimer().getCurrentBitsLength()) {
 			// just a precautionary check!
@@ -177,13 +179,18 @@ public class AdjustorAndUpdator {
 		int oldPartBitsLen = oldPart.getCurrentBitsLength();
 		int oldVidLengthInBits = oldVId.getBitsLengthPostAssembly();
 
-		if (currVId.getShufflingChoiceInAssembly() == ShufflingChoice.RANDOM_PLACE_MAPPINGS) {
-			if (currVId.getAssemblingChoice() != AssemblingChoice.NO_MIXING) {
-				for (int i = 0; i < extraBits; i++) {
-					newPart.getIndexToVidPlaceMappings().put(oldPartBitsLen + i, oldVidLengthInBits + i);
-				}
+		// in assembly line if shuffl-choice is randomPlaceMapping and this part is
+		// mixable then update it's mappings
+		// or simply put if it's mappings is not null then update as it's in middle so
+		// no need to validate.
+		// if (currVId.getShufflingChoiceInAssembly() ==
+		// ShufflingChoice.RANDOM_PLACE_MAPPINGS) {
+		if (newPart.getIndexToVidPlaceMappings() != null) {
+			for (int i = 0; i < extraBits; i++) {
+				newPart.getIndexToVidPlaceMappings().put(oldPartBitsLen + i, oldVidLengthInBits + i);
 			}
 		}
+		// }
 
 		// adding internal mappings.
 
@@ -196,7 +203,7 @@ public class AdjustorAndUpdator {
 		}
 	}
 
-	private void shuffleTimer(ServiceCaller serviceCaller, VId currVId) {
+	private void shuffleTimer(ServiceCaller serviceCaller, VId currVId, List<CommonFields> parts) {
 
 		Timer currTimer = currVId.getTimer();
 		VIdUtility.shuffleSymbolStore(currTimer.getSymbolTable(), ThreadLocalRandom.current());
@@ -207,7 +214,11 @@ public class AdjustorAndUpdator {
 
 		serviceCaller.getTimerGenerator().generate(currVId);
 
-		if (currVId.getShufflingChoiceInAssembly() == ShufflingChoice.RANDOM_PLACE_MAPPINGS) {
+		VIdUtility
+				.modifyAggregatedPlaceMappings(parts.stream().filter(part -> part.getIndexToVidPlaceMappings() != null)
+						.map(part -> part.getIndexToVidPlaceMappings()).toList());
+
+		/*if (currVId.getShufflingChoiceInAssembly() == ShufflingChoice.RANDOM_PLACE_MAPPINGS) {
 			if (currVId.getAssemblingChoice() == AssemblingChoice.MIX_TIMER_SEQUENCER_RANDOMIZER) {
 				VIdUtility.modifyAggregatedPlaceMappings(
 						Arrays.asList(currVId.getSequencer().getIndexToVidPlaceMappings(),
@@ -218,7 +229,7 @@ public class AdjustorAndUpdator {
 						Arrays.asList(currVId.getSequencer().getIndexToVidPlaceMappings(),
 								currVId.getTimer().getIndexToVidPlaceMappings()));
 			}
-		}
+		}*/
 
 		if (currTimer.getShufflingChoice() == ShufflingChoice.RANDOM_PLACE_MAPPINGS) {
 			currTimer.setBitsInternalPlaceMappings(
@@ -227,8 +238,8 @@ public class AdjustorAndUpdator {
 
 	}
 
-	private void resetRegenerateReshuffleAndRemapOfInternalAndVIdMappingsForSequencerAndRandomizer(
-			ServiceCaller serviceCaller, VId currVId) {
+	private void resetRegenerateReshuffleAndRemapOfInternalAndVIdMappingsForNonTimerParts(ServiceCaller serviceCaller,
+			VId currVId, List<CommonFields> parts) {
 		Sequencer currSeq = currVId.getSequencer();
 		currSeq.setValue(null);
 
@@ -248,7 +259,10 @@ public class AdjustorAndUpdator {
 		}
 
 		// reallocate positions in VId, if placeMappings is used.
-
+		VIdUtility
+				.modifyAggregatedPlaceMappings(parts.stream().filter(part -> part.getIndexToVidPlaceMappings() != null)
+						.map(part -> part.getIndexToVidPlaceMappings()).toList());
+		/*
 		if (currVId.getShufflingChoiceInAssembly() == ShufflingChoice.RANDOM_PLACE_MAPPINGS) {
 			if (currVId.getAssemblingChoice() == AssemblingChoice.MIX_TIMER_SEQUENCER_RANDOMIZER) {
 				VIdUtility.modifyAggregatedPlaceMappings(
@@ -259,6 +273,7 @@ public class AdjustorAndUpdator {
 						Arrays.asList(currVId.getSequencer().getIndexToVidPlaceMappings()));
 			}
 		}
+		*/
 
 	}
 
