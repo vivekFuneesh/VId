@@ -70,9 +70,10 @@ public interface SampleVIdService {
 					System.out.println("Sequencer choice" + vId.getSequencer().getSeqC());
 					System.out.println("shuffling choice" + vId.getTimer().getShufflingChoice() + " "
 							+ vId.getSequencer().getShufflingChoice() + " " + vId.getRandomizer().getShufflingChoice());
-					System.out.println("assembling choice" + vId.getAssemblingChoice());
+
+					// System.out.println("assembling choice" + vId.getAssemblingChoice());
 					System.out.println("shuffling choice in assembly" + vId.getShufflingChoiceInAssembly());
-					System.out.println("assemblingChoice: " + dto.getAssemblingChoice());
+					// System.out.println("assemblingChoice: " + dto.getAssemblingChoice());
 				}
 
 				// System.out.println("DB calls" +

@@ -43,7 +43,6 @@ import org.springframework.web.context.annotation.RequestScope;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.client.MongoClient;
-import com.vivek.vVidLib.models.AssemblingChoice;
 import com.vivek.vVidLib.models.CommonFields;
 import com.vivek.vVidLib.models.InitializerDto;
 import com.vivek.vVidLib.models.Randomizer;
@@ -177,13 +176,16 @@ public class VIdGenerator {
 			 *
 			 */
 
-			System.out.println("Loading form DB--");
+//			System.out.println("Loading form DB--");
 			currentVId = mm.map(state, VId.class);
 			currentVId.setTimer(mm.map(state.getTimerState(), Timer.class));
 			currentVId.setSequencer(mm.map(state.getSequencerState(), Sequencer.class));
 			currentVId.setRandomizer(mm.map(state.getRandomizerState(), Randomizer.class));
-
-			// putting default value for the time being..
+//			System.out.println("loaded assembling order is = "+ currentVId.getAssemblingOrder()+
+//					"\ntimer ="+currentVId.getTimer().getIdentitySymbol()+
+//					"\nsequencer="+currentVId.getSequencer().getIdentitySymbol()+
+//					"\nrandomizer="+currentVId.getRandomizer().getIdentitySymbol());
+//			 putting default value for the time being..
 			SynchronizingObject synchronizingObject = new SynchronizingObject();
 			synchronizingObject.setId("default-ID");
 			currentVId.getTimer().setSynchronizingObject(synchronizingObject);
@@ -255,6 +257,7 @@ public class VIdGenerator {
 		 * TODO: Check for clock backward drift first. HandleBackwardClockDrift();
 		 *
 		 */
+		List<CommonFields> parts;
 
 		if (oldVId == null) {
 			currVId = new VId();
@@ -262,34 +265,21 @@ public class VIdGenerator {
 			currVId.setSequencer(new Sequencer());
 			currVId.setRandomizer(new Randomizer());
 
-			System.out.println("\n dto's shufll choice in assembly = " + dto.getShufflingChoiceInAssembly() + "\n");
-
-			if (dto.getShufflingChoiceInAssembly() != null)
-				currVId.setShufflingChoiceInAssembly(dto.getShufflingChoiceInAssembly());
-
-			if (dto.getRandomizerShufflingChoice() != null)
-				currVId.getRandomizer().setShufflingChoice(dto.getRandomizerShufflingChoice());
-
-			if (dto.getSequencerChoice() != null)
-				currVId.getSequencer().setSeqC(dto.getSequencerChoice());
-
-			if (dto.getSequencerShufflingChoice() != null)
-				currVId.getSequencer().setShufflingChoice(dto.getSequencerShufflingChoice());
-
-			if (dto.getTimerShufflingChoice() != null)
-				currVId.getTimer().setShufflingChoice(dto.getTimerShufflingChoice());
-
-			if (dto.getAssemblingChoice() != null)
-				currVId.setAssemblingChoice(dto.getAssemblingChoice());
+			InitializerAndVerifier.initializeFromDto(currVId, dto);
 
 			currVId = InitializerAndVerifier.defaultInitializeVId(currVId);
 
+			System.out.println("\n dto's shufll choice in assembly = " + dto.getShufflingChoiceInAssembly() + "\n");
+
+			System.out.println(currVId.getAssemblingOrder());
+
 		} else {
-			currVId = objectMapper.convertValue(oldVId, VId.class);
 			// copy oldVId to temp (to act like old) and rename oldVId to currVId
+			currVId = objectMapper.convertValue(oldVId, VId.class);
+
 		}
 
-		List<CommonFields> parts = Arrays.asList(currVId.getTimer(), currVId.getSequencer(), currVId.getRandomizer());
+		parts = Arrays.asList(currVId.getTimer(), currVId.getSequencer(), currVId.getRandomizer());
 
 		VIdUtility.validate(currVId, parts);
 
@@ -298,49 +288,92 @@ public class VIdGenerator {
 
 		// if 1st time then after generate, produce internal & VId place mappings
 		if (oldVId == null) {
-			// AssemblingChoice takes preference over shufflingChoiceInAssembly
 
-			if (currVId.getAssemblingChoice() == AssemblingChoice.NO_MIXING) {
-				parts.stream().forEach(part -> part.setIndexToVidPlaceMappings(null));
-				currVId.setShufflingChoiceInAssembly(null);
-			} else if (currVId.getShufflingChoiceInAssembly() == ShufflingChoice.RANDOM_PLACE_MAPPINGS) {
+			/**		if shufflingChoiceINAssembly == random place mappings
+			 * 			 set indexToVidPlacemappings as null for all whose toBeMixedInAssembly is false;
+			 * 			 generate default indexToVidPlaceMappings for all others.
+			 * 		else( shufflingChoiceInAssembly is Fixed Positions )
+			 * 			set indexToVidPlaceMappings as null for all parts.
+			 * 			
+			 * 		for all parts whose (internal) shuffling choice is random place mappings irrespective of toBeMixedInAssembly
+			 * 			default generate there internal mappings 
+			 * 		for parts whose (internal) shuffling choice is Fixed Positions
+			 * 			set their internal mappings as null.
+			 * 		
+			 * */
+
+			if (currVId.getShufflingChoiceInAssembly() == ShufflingChoice.RANDOM_PLACE_MAPPINGS) {
+
 				InitializerAndVerifier.defaultIndexToVIdPlaceMappings(currVId,
-						parts.stream().mapToInt(part -> part.getValueInBits().length()).sum());
+						parts.stream().mapToInt(part -> part.getValueInBits().length()).sum(), parts);
 
-				if (currVId.getAssemblingChoice() == AssemblingChoice.MIX_ONLY_TIMER_SEQUENCER) {
-					currVId.getRandomizer().setIndexToVidPlaceMappings(null);
-				}
+				parts.stream().filter(part -> !part.getToBeMixedInAssembly()).forEach(part -> {
+					part.setIndexToVidPlaceMappings(null);
+				});
 			} else {
-				parts.stream().forEach(part -> part.setIndexToVidPlaceMappings(null));
+				parts.stream().forEach(part -> {
+					part.setIndexToVidPlaceMappings(null);
+				});
 			}
 
-			// currentNumberOfSymbolsRequired, so creating internalMappings post timer
-			// generator
-
-			if (currVId.getTimer().getShufflingChoice() == ShufflingChoice.RANDOM_PLACE_MAPPINGS) {
-				InitializerAndVerifier.defaultInternalPlaceMappings(currVId.getTimer(),
-						currVId.getTimer().getCurrentNumberOfSymbols());
-			}
+			parts.stream().filter(part -> (part.getShufflingChoice() == ShufflingChoice.RANDOM_PLACE_MAPPINGS)
+					&& (part.getBitsInternalPlaceMappings() == null)).forEach(part -> {
+						InitializerAndVerifier.defaultInternalPlaceMappings(part, part.getCurrentNumberOfSymbols());
+					});
 
 			parts.stream().forEach(part -> {
 				if (part.getShufflingChoice() == ShufflingChoice.FIXED_POSITIONS) {
 					part.setBitsInternalPlaceMappings(null);
 				}
 			});
+
+			/*
+			// AssemblingChoice takes preference over shufflingChoiceInAssembly
+			
+			if (currVId.getAssemblingChoice() == AssemblingChoice.NO_MIXING) {
+				parts.stream().filter(part->!part.getToBeMixedInAssembly())
+				.forEach(part -> part.setIndexToVidPlaceMappings(null));
+				
+				currVId.setShufflingChoiceInAssembly(null);
+			
+			} else if (currVId.getShufflingChoiceInAssembly() == ShufflingChoice.RANDOM_PLACE_MAPPINGS) {
+				InitializerAndVerifier.defaultIndexToVIdPlaceMappings(currVId,
+						parts.stream().mapToInt(part -> part.getValueInBits().length()).sum(), parts);
+			
+				if (currVId.getAssemblingChoice() == AssemblingChoice.MIX_ONLY_TIMER_SEQUENCER) {
+					currVId.getRandomizer().setIndexToVidPlaceMappings(null);
+				}
+			} else {
+				parts.stream().forEach(part -> part.setIndexToVidPlaceMappings(null));
+			}
+			
+			// currentNumberOfSymbolsRequired, so creating internalMappings post timer
+			// generator
+			
+			if (currVId.getTimer().getShufflingChoice() == ShufflingChoice.RANDOM_PLACE_MAPPINGS) {
+				InitializerAndVerifier.defaultInternalPlaceMappings(currVId.getTimer(),
+						currVId.getTimer().getCurrentNumberOfSymbols());
+			}
+			 
+			parts.stream().forEach(part -> {
+				if (part.getShufflingChoice() == ShufflingChoice.FIXED_POSITIONS) {
+					part.setBitsInternalPlaceMappings(null);
+				}
+			});*/
 		}
 
 		// AdjustAndUpdate (if temp is not null)
 		if (oldVId != null) {
 			// System.out.println(" sync Object= "+
 			// currVId.getTimer().getSynchronizingObject());
-			serviceCaller.getAdjustorAndUpdator().process(serviceCaller, currVId, oldVId);
+			serviceCaller.getAdjustorAndUpdator().process(serviceCaller, currVId, oldVId, parts);
 		}
 
 		// Shuffle
 		shuffle(currVId, parts);
 
 		// Assemble
-		serviceCaller.getAssembler().assemble(currVId);
+		serviceCaller.getAssembler().assemble(currVId, parts);
 
 		// compile from bits to symbol-mapped-value.
 		VIdUtility.mapBitsWithSecondBaseToSymbols(currVId);

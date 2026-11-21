@@ -29,7 +29,6 @@
 package com.vivek.vVidLib.serviceImpl;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -43,9 +42,8 @@ import java.util.stream.IntStream;
 
 import org.springframework.stereotype.Component;
 
-import com.vivek.vVidLib.models.AssemblingChoice;
-import com.vivek.vVidLib.models.AssemblingChoice.ASSEMBLY_SEQUENCE;
 import com.vivek.vVidLib.models.CommonFields;
+import com.vivek.vVidLib.models.InitializerDto;
 import com.vivek.vVidLib.models.Randomizer;
 import com.vivek.vVidLib.models.Sequencer;
 import com.vivek.vVidLib.models.SequencerChoice;
@@ -193,8 +191,40 @@ import com.vivek.vVidLib.utility.VIdUtility;
 @Component
 public class InitializerAndVerifier {
 
-	public static void initializeAndVerifyVId(VId vId) {
+	public static void resetForUnavailability(CommonFields part) {
 
+	}
+
+	public static void initializeFromDto(VId currVId, InitializerDto dto) {
+		if (dto.getShufflingChoiceInAssembly() != null)
+			currVId.setShufflingChoiceInAssembly(dto.getShufflingChoiceInAssembly());
+
+		if (dto.getRandomizerShufflingChoice() != null)
+			currVId.getRandomizer().setShufflingChoice(dto.getRandomizerShufflingChoice());
+
+		if (dto.getSequencerChoice() != null)
+			currVId.getSequencer().setSeqC(dto.getSequencerChoice());
+
+		if (dto.getSequencerShufflingChoice() != null)
+			currVId.getSequencer().setShufflingChoice(dto.getSequencerShufflingChoice());
+
+		if (dto.getTimerShufflingChoice() != null)
+			currVId.getTimer().setShufflingChoice(dto.getTimerShufflingChoice());
+
+		// assembling choice of nomix, mix2, mixAll replaced by ToBeMixed boolean below.
+		// if (dto.getAssemblingChoice() != null)
+		// currVId.setAssemblingChoice(dto.getAssemblingChoice());
+
+		if (dto.getMixRandomizerInAssembly() != null)
+			currVId.getRandomizer().setToBeMixedInAssembly(dto.getMixRandomizerInAssembly());
+		if (dto.getMixSequencerInAssembly() != null)
+			currVId.getSequencer().setToBeMixedInAssembly(dto.getMixSequencerInAssembly());
+		if (dto.getMixTimerInAssembly() != null)
+			currVId.getTimer().setToBeMixedInAssembly(dto.getMixTimerInAssembly());
+
+		if (dto.getAssemblingOrder() != null) {
+			currVId.setAssemblingOrder(dto.getAssemblingOrder());
+		}
 	}
 
 	public static VId defaultInitializeVId(VId vId) {
@@ -209,11 +239,20 @@ public class InitializerAndVerifier {
 	}
 
 	public static void defaultVIdSettings(VId vId) {
-		if (vId.getAssemblingChoice() == null) {
-			vId.setAssemblingChoice(AssemblingChoice.MIX_TIMER_SEQUENCER_RANDOMIZER);
-		}
-		if (vId.getAssemblySequence() == null) {
-			vId.setAssemblySequence(ASSEMBLY_SEQUENCE.TSR);
+		// mix all by default
+		if (vId.getRandomizer().getToBeMixedInAssembly() == null)
+			vId.getRandomizer().setToBeMixedInAssembly(true);
+		if (vId.getSequencer().getToBeMixedInAssembly() == null)
+			vId.getSequencer().setToBeMixedInAssembly(true);
+		if (vId.getTimer().getToBeMixedInAssembly() == null)
+			vId.getTimer().setToBeMixedInAssembly(true);
+
+		if (vId.getAssemblingOrder() == null) {
+			Map<String, Integer> assemblingOrder = new HashMap<String, Integer>();
+			assemblingOrder.put(vId.getTimer().getIdentitySymbol(), 2);
+			assemblingOrder.put(vId.getSequencer().getIdentitySymbol(), 1);
+			assemblingOrder.put(vId.getRandomizer().getIdentitySymbol(), 3);
+			vId.setAssemblingOrder(assemblingOrder);
 		}
 
 		if (vId.getShufflingChoiceInAssembly() == null)
@@ -238,6 +277,7 @@ public class InitializerAndVerifier {
 
 		vId.setFinalBitLengthConstraint(
 				VIdUtility.calculateBitLengthConstraint(vId.getFinalFirstBase() - 1, vId.getFinalSecondBase()));
+
 	}
 
 	/**
@@ -246,6 +286,9 @@ public class InitializerAndVerifier {
 	public static void defaultInitializeSequencer(VId vId) {
 		Sequencer seq = vId.getSequencer();
 
+		if (seq.getIdentitySymbol() == null) {
+			seq.setIdentitySymbol("S");
+		}
 		if (seq.getSeqC() == null)
 			seq.setSeqC(SequencerChoice.SLOW);
 		seq.setInitialNumberOfSymbols(1);
@@ -258,8 +301,12 @@ public class InitializerAndVerifier {
 
 	public static void defaultInitializeRandomizer(VId vId) {
 		Randomizer ran = vId.getRandomizer();
+
 		ran.setCurrentNumberOfSymbols(1);
 
+		if (ran.getIdentitySymbol() == null) {
+			ran.setIdentitySymbol("R");
+		}
 		setDefaultCommonFields(ran);
 		if (vId.getRandomizer().getShufflingChoice() == ShufflingChoice.RANDOM_PLACE_MAPPINGS)
 			defaultInternalPlaceMappings(ran, ran.getCurrentNumberOfSymbols());
@@ -272,6 +319,9 @@ public class InitializerAndVerifier {
 	public static void defaultInitializeTimer(VId vId) {
 		Timer timer = vId.getTimer();
 
+		if (timer.getIdentitySymbol() == null) {
+			timer.setIdentitySymbol("T");
+		}
 		setDefaultCommonFields(timer);
 
 		timer.setPrecision(1);
@@ -305,8 +355,7 @@ public class InitializerAndVerifier {
 
 	}
 
-	public static void defaultIndexToVIdPlaceMappings(VId vId, int totalBitsLength) {
-		List<CommonFields> parts = Arrays.asList(vId.getTimer(), vId.getSequencer(), vId.getRandomizer());
+	public static void defaultIndexToVIdPlaceMappings(VId vId, int totalBitsLength, List<CommonFields> parts) {
 
 		List<Integer> shuffledVIdIndices = IntStream.range(0, totalBitsLength).boxed().collect(Collectors.toList());
 		Collections.shuffle(shuffledVIdIndices, ThreadLocalRandom.current());

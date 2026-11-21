@@ -34,10 +34,12 @@ public class SequencerState {
 	private int secondBase;
 	private int firstBase;
 	private int bitLengthConstraint;
+	private String identitySymbol;
 	private Map<Integer, String> symbolTable;
 	private Map<Integer, Integer> bitsInternalPlaceMappings;
 	private Map<Integer, Integer> indexToVidPlaceMappings;
 	private ShufflingChoice shufflingChoice;
 	private SequencerChoice seqC;
+	private Boolean toBeMixedInAssembly;
 
 }

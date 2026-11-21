@@ -40,7 +40,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.vivek.vVidLib.models.AssemblingChoice;
 import com.vivek.vVidLib.models.InitializerDto;
 import com.vivek.vVidLib.models.SequencerChoice;
 import com.vivek.vVidLib.models.ShufflingChoice;
@@ -82,7 +81,10 @@ class VVidLibApplicationTests {
 		dto.setTimerShufflingChoice(ShufflingChoice.FIXED_POSITIONS);
 
 		// 2
-		dto.setAssemblingChoice(AssemblingChoice.MIX_TIMER_SEQUENCER_RANDOMIZER);
+		// dto.setAssemblingChoice(AssemblingChoice.MIX_TIMER_SEQUENCER_RANDOMIZER);
+		dto.setMixRandomizerInAssembly(true);
+		dto.setMixSequencerInAssembly(true);
+		dto.setMixTimerInAssembly(true);
 
 		// P
 		dto.setShufflingChoiceInAssembly(ShufflingChoice.RANDOM_PLACE_MAPPINGS);
@@ -158,7 +160,11 @@ class VVidLibApplicationTests {
 		repo.deleteAll();
 		dto.setSaveIntoFile("SP1Fi");
 		dto.setSequencerChoice(SequencerChoice.SLOW);
-		dto.setAssemblingChoice(AssemblingChoice.MIX_ONLY_TIMER_SEQUENCER);
+//		dto.setAssemblingChoice(AssemblingChoice.MIX_ONLY_TIMER_SEQUENCER);
+		dto.setMixRandomizerInAssembly(false);
+//		dto.setMixSequencerInAssembly(true);
+//		dto.setMixTimerInAssembly(true);
+
 		dto.setShufflingChoiceInAssembly(ShufflingChoice.FIXED_POSITIONS);
 
 		dto.setVIdCountToGenerate(2000);
@@ -172,8 +178,11 @@ class VVidLibApplicationTests {
 		repo.deleteAll();
 		dto.setSaveIntoFile("SP1P");
 		dto.setSequencerChoice(SequencerChoice.SLOW);
-		dto.setAssemblingChoice(AssemblingChoice.MIX_ONLY_TIMER_SEQUENCER);
+		// dto.setAssemblingChoice(AssemblingChoice.MIX_ONLY_TIMER_SEQUENCER);
 		dto.setShufflingChoiceInAssembly(ShufflingChoice.RANDOM_PLACE_MAPPINGS);
+		dto.setMixRandomizerInAssembly(false);
+//		dto.setMixSequencerInAssembly(true);
+//		dto.setMixTimerInAssembly(true);
 
 		dto.setVIdCountToGenerate(2000);
 		assertThat(sampleService.getVId(dto, context, om)).isNotNull();
@@ -186,7 +195,11 @@ class VVidLibApplicationTests {
 		repo.deleteAll();
 		dto.setSaveIntoFile("FP1P");
 		dto.setSequencerChoice(SequencerChoice.FAST);
-		dto.setAssemblingChoice(AssemblingChoice.MIX_ONLY_TIMER_SEQUENCER);
+//		dto.setAssemblingChoice(AssemblingChoice.MIX_ONLY_TIMER_SEQUENCER);
+		dto.setMixRandomizerInAssembly(false);
+//		dto.setMixSequencerInAssembly(true);
+//		dto.setMixTimerInAssembly(true);
+
 		dto.setShufflingChoiceInAssembly(ShufflingChoice.RANDOM_PLACE_MAPPINGS);
 
 		dto.setTimerShufflingChoice(ShufflingChoice.RANDOM_PLACE_MAPPINGS);
@@ -211,7 +224,11 @@ class VVidLibApplicationTests {
 		repo.deleteAll();
 		dto.setSaveIntoFile("FP1Fi");
 		dto.setSequencerChoice(SequencerChoice.FAST);
-		dto.setAssemblingChoice(AssemblingChoice.MIX_ONLY_TIMER_SEQUENCER);
+//		dto.setAssemblingChoice(AssemblingChoice.MIX_ONLY_TIMER_SEQUENCER);
+		dto.setMixRandomizerInAssembly(false);
+//		dto.setMixSequencerInAssembly(true);
+//		dto.setMixTimerInAssembly(true);
+
 		dto.setShufflingChoiceInAssembly(ShufflingChoice.FIXED_POSITIONS);
 
 		dto.setSequencerShufflingChoice(ShufflingChoice.FIXED_POSITIONS);
@@ -236,8 +253,11 @@ class VVidLibApplicationTests {
 		repo.deleteAll();
 		dto.setSaveIntoFile("FP0");
 		dto.setSequencerChoice(SequencerChoice.FAST);
-		dto.setAssemblingChoice(AssemblingChoice.NO_MIXING);
-		// below should be converted to null, check in system.out logs
+//		dto.setAssemblingChoice(AssemblingChoice.NO_MIXING);
+		dto.setMixRandomizerInAssembly(false);
+		dto.setMixSequencerInAssembly(false);
+		dto.setMixTimerInAssembly(false);
+
 		dto.setShufflingChoiceInAssembly(ShufflingChoice.FIXED_POSITIONS);
 
 		dto.setSequencerShufflingChoice(ShufflingChoice.FIXED_POSITIONS);
@@ -264,8 +284,11 @@ class VVidLibApplicationTests {
 		repo.deleteAll();
 		dto.setSaveIntoFile("SP0");
 		dto.setSequencerChoice(SequencerChoice.SLOW);
-		dto.setAssemblingChoice(AssemblingChoice.NO_MIXING);
-		// below should be converted to null, check in system.out logs
+		// dto.setAssemblingChoice(AssemblingChoice.NO_MIXING);
+		dto.setMixRandomizerInAssembly(false);
+		dto.setMixSequencerInAssembly(false);
+		dto.setMixTimerInAssembly(false);
+
 		dto.setShufflingChoiceInAssembly(ShufflingChoice.FIXED_POSITIONS);
 
 		dto.setSequencerShufflingChoice(ShufflingChoice.FIXED_POSITIONS);
@@ -291,7 +314,7 @@ class VVidLibApplicationTests {
 		repo.deleteAll();
 		dto.setSaveIntoFile("MaxLenT-FFi2P");
 		dto.setSequencerChoice(SequencerChoice.FAST);
-		dto.setAssemblingChoice(AssemblingChoice.MIX_TIMER_SEQUENCER_RANDOMIZER);
+//		dto.setAssemblingChoice(AssemblingChoice.MIX_TIMER_SEQUENCER_RANDOMIZER);
 		dto.setShufflingChoiceInAssembly(ShufflingChoice.RANDOM_PLACE_MAPPINGS);
 
 		dto.setSequencerShufflingChoice(ShufflingChoice.FIXED_POSITIONS);
@@ -309,7 +332,7 @@ class VVidLibApplicationTests {
 		repo.deleteAll();
 		dto.setSaveIntoFile("MaxLenT-FP2P");
 		dto.setSequencerChoice(SequencerChoice.FAST);
-		dto.setAssemblingChoice(AssemblingChoice.MIX_TIMER_SEQUENCER_RANDOMIZER);
+//		dto.setAssemblingChoice(AssemblingChoice.MIX_TIMER_SEQUENCER_RANDOMIZER);
 		dto.setShufflingChoiceInAssembly(ShufflingChoice.RANDOM_PLACE_MAPPINGS);
 
 		dto.setSequencerShufflingChoice(ShufflingChoice.RANDOM_PLACE_MAPPINGS);
@@ -320,4 +343,5 @@ class VVidLibApplicationTests {
 		assertThat(sampleService.getVId(dto, context, om)).isNotNull();
 		Uniqueness_Check_Program.main(new String[] { "MaxLenT-FP2P_2000.txt" });
 	}
+
 }

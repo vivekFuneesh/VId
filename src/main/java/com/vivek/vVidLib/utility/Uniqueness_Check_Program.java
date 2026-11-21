@@ -74,7 +74,7 @@ public class Uniqueness_Check_Program {
 
 					if (map.get(str) != null) {
 						System.out.println("--FATAL ERROR--\n\tDuplicate VId:: " + str + " count = " + count);
-						// System.exit(0);
+						System.exit(0);
 					} else {
 						map.put(str, 1);
 						count++;

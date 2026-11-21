@@ -30,15 +30,18 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class CommonFields {
+	private String identitySymbol;
+
+	private Boolean toBeMixedInAssembly;
 
 	// value in bits form in 2nd base.
 	private String valueInBits;
 
 	/**
-	 * CHECK_REASON:: If Keeping it separate because oldValueInBits is used for
-	 * processing in AdjustorAndUpdator
+	 * Keeping it separate because valueInBits is used for
+	 * processing in AdjustorAndUpdator. keep it separate for debug purpose.
 	 */
-	private String rectifiedValueInBitsDuringAsembly;
+	private String remappedValueInBitsToVIdSymbolTableInAssembly;
 
 	private int currentNumberOfSymbols; // no. of symbols in 1st base
 

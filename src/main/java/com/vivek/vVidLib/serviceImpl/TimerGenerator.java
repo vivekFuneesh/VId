@@ -42,10 +42,11 @@ import com.vivek.vVidLib.utility.VIdUtility;
 public class TimerGenerator implements Generator {
 
 	public void generate(VId timerz) {
-
 		Timer timer = timerz.getTimer();
 
+//		System.out.println("timerGenerator object ID="+ timer.hashCode());
 		if (timer.getPrecisedValue() == null) {
+//			System.out.println("timerGenerator object ID="+ timer.hashCode());
 			// reset basetime
 			// it acts as a starting point for 0, 00, 000, 0000.. series.
 			timer.setBaseTime(BigInteger.valueOf(getTimeInMillis()));
@@ -63,7 +64,7 @@ public class TimerGenerator implements Generator {
 
 			timer.setCurrentBitsLength(timer.getValueInBits().length());
 		} else {
-
+//			System.out.println("timerGenerator object ID="+ timer.hashCode());
 			timer.setActualValue(BigInteger.valueOf(getTimeInMillis()).subtract(timer.getBaseTime()));
 
 			timer.setPrecisedValue(timer.getActualValue().divide(BigInteger.TEN.pow(timer.getPrecision())));
