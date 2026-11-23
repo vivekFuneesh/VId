@@ -49,6 +49,11 @@ public class InitializerDto {
 	private ShufflingChoice timerShufflingChoice;
 	private ShufflingChoice sequencerShufflingChoice;
 	private ShufflingChoice randomizerShufflingChoice;
+
+	// default is non-keyless profiles
+	@NotNull
+	private KeyChoice profilesBasedOnkKey;
+
 	private Boolean mixTimerInAssembly;
 	private Boolean mixSequencerInAssembly;
 	private Boolean mixRandomizerInAssembly;

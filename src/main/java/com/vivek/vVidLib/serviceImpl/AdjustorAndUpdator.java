@@ -35,6 +35,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import org.springframework.stereotype.Component;
 
 import com.vivek.vVidLib.models.CommonFields;
+import com.vivek.vVidLib.models.KeyChoice;
 import com.vivek.vVidLib.models.Randomizer;
 import com.vivek.vVidLib.models.Sequencer;
 import com.vivek.vVidLib.models.SequencerChoice;
@@ -106,7 +107,7 @@ public class AdjustorAndUpdator {
 						synchronized (currVId.getTimer().getSynchronizingObject()) {
 //							System.out.println("Waiting for " + waitTime + " milliSeconds");
 							if (waitTime > 0) {
-//								System.out.println("\n--waiting\n");
+//								System.out.println("\n--waiting inside adjustUpdate  \n"+ waitTime);
 								currVId.getTimer().getSynchronizingObject().wait(waitTime);
 
 							}
@@ -208,8 +209,10 @@ public class AdjustorAndUpdator {
 		Timer currTimer = currVId.getTimer();
 		VIdUtility.shuffleSymbolStore(currTimer.getSymbolTable(), ThreadLocalRandom.current());
 
-//		these 2 statements will reset timer-counter while maintaining length/no_of_symbols_in_timer
-		currTimer.setPrecisedValue(null);
+//		if no key saving is there, reset timer-counter while maintaining length/no_of_symbols_in_timer
+		if (currVId.getProfilesBasedOnkKey() == KeyChoice.PROFILES_WITH_KEY) {
+			currTimer.setPrecisedValue(null);
+		}
 		currTimer.setInitialNumberOfSymbols(currTimer.getCurrentNumberOfSymbols());
 
 		serviceCaller.getTimerGenerator().generate(currVId);

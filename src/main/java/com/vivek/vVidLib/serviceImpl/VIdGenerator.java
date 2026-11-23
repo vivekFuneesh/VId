@@ -34,8 +34,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import javax.annotation.PostConstruct;
-
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -45,6 +43,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.client.MongoClient;
 import com.vivek.vVidLib.models.CommonFields;
 import com.vivek.vVidLib.models.InitializerDto;
+import com.vivek.vVidLib.models.KeyChoice;
 import com.vivek.vVidLib.models.Randomizer;
 import com.vivek.vVidLib.models.RandomizerState;
 import com.vivek.vVidLib.models.Sequencer;
@@ -165,7 +164,6 @@ public class VIdGenerator {
 		return this.numberOfDatabaseCalls;
 	}
 
-	@PostConstruct
 	public void checkAndLoad() {
 		System.out.println("Inside checkAndLoad");
 		state = vIdStateRepo.findAll().stream().findFirst().orElse(null);
@@ -190,26 +188,34 @@ public class VIdGenerator {
 			synchronizingObject.setId("default-ID");
 			currentVId.getTimer().setSynchronizingObject(synchronizingObject);
 
-			BigInteger precisor = BigInteger.TEN.pow(currentVId.getTimer().getPrecision());
-			BigInteger newMinimumTimer = BigInteger.valueOf(Instant.now().toEpochMilli())
-					.subtract(currentVId.getTimer().getBaseTime());
+			waitBeforeProceeding(currentVId);
+		}
+	}
 
-			currentVId.getTimer().setPrecisedValue(newMinimumTimer.divide(precisor));
+	// In short, wait for timer.getPrecision() ms only.
+	public void waitBeforeProceeding(VId currVId) {
+		System.out.println(Instant.now().toEpochMilli());
+		BigInteger precisor = BigInteger.TEN.pow(currVId.getTimer().getPrecision());
+		BigInteger newMinimumTimer = BigInteger.valueOf(Instant.now().toEpochMilli())
+				.subtract(currVId.getTimer().getBaseTime());
 
-			newMinimumTimer = currentVId.getTimer().getPrecisedValue().add(BigInteger.ONE).multiply(precisor)
-					.add(currentVId.getTimer().getBaseTime());
+		currVId.getTimer().setPrecisedValue(newMinimumTimer.divide(precisor));
 
-			long waitTime = newMinimumTimer.subtract(BigInteger.valueOf(Instant.now().toEpochMilli())).longValueExact();
-			if (waitTime > 0) {
-				System.out.println("Waiting Time  after loder: in ms = " + waitTime);
-				try {
-					synchronized (currentVId.getTimer().getSynchronizingObject()) {
-						currentVId.getTimer().getSynchronizingObject().wait(waitTime);
-					}
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+		newMinimumTimer = currVId.getTimer().getPrecisedValue().add(BigInteger.ONE).multiply(precisor)
+				.add(currVId.getTimer().getBaseTime());
+
+		long waitTime = newMinimumTimer.subtract(BigInteger.valueOf(Instant.now().toEpochMilli())).longValueExact();
+
+		if (waitTime > 0) {
+			System.out.println("Waiting Time  after loader: in ms = " + waitTime);
+			try {
+				synchronized (currVId.getTimer().getSynchronizingObject()) {
+					currVId.getTimer().getSynchronizingObject().wait(waitTime);
 				}
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+
 			}
 		}
 	}
@@ -218,7 +224,8 @@ public class VIdGenerator {
 		VId oldVId = currentVId;
 		currentVId = getNext(oldVId, dto);
 
-		if (oldVId == null || currentVId.getVid().length() > oldVId.getVid().length()) {
+		if (dto.getProfilesBasedOnkKey() == KeyChoice.PROFILES_WITH_KEY
+				&& (oldVId == null || currentVId.getVid().length() > oldVId.getVid().length())) {
 			VIdState newState = mm.map(currentVId, VIdState.class);
 
 			if (oldVId != null) {
@@ -272,6 +279,9 @@ public class VIdGenerator {
 			System.out.println("\n dto's shufll choice in assembly = " + dto.getShufflingChoiceInAssembly() + "\n");
 
 			System.out.println(currVId.getAssemblingOrder());
+			if (currVId.getProfilesBasedOnkKey() == KeyChoice.PROFILES_WITHOUT_KEY) {
+				waitBeforeProceeding(currVId);
+			}
 
 		} else {
 			// copy oldVId to temp (to act like old) and rename oldVId to currVId
@@ -281,6 +291,7 @@ public class VIdGenerator {
 
 		parts = Arrays.asList(currVId.getTimer(), currVId.getSequencer(), currVId.getRandomizer());
 
+		// todo: irrelevant condition check per generation.
 		VIdUtility.validate(currVId, parts);
 
 		// Generate
@@ -327,6 +338,8 @@ public class VIdGenerator {
 				}
 			});
 
+			System.out.println("timer's internal shuffle table" + currVId.getTimer().getBitsInternalPlaceMappings());
+
 			/*
 			// AssemblingChoice takes preference over shufflingChoiceInAssembly
 			
@@ -360,6 +373,7 @@ public class VIdGenerator {
 					part.setBitsInternalPlaceMappings(null);
 				}
 			});*/
+			System.out.println("CurrVId state is: \n" + currVId);
 		}
 
 		// AdjustAndUpdate (if temp is not null)

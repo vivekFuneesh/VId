@@ -35,9 +35,11 @@ import org.springframework.context.ApplicationContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vivek.vVidLib.models.InitializerDto;
+import com.vivek.vVidLib.models.KeyChoice;
 import com.vivek.vVidLib.models.VId;
 import com.vivek.vVidLib.serviceImpl.VIdGenerator;
 import com.vivek.vVidLib.utility.Uniqueness_Check_Program;
+import com.vivek.vVidLib.utility.VIdUtility;
 
 public interface SampleVIdService {
 
@@ -50,10 +52,18 @@ public interface SampleVIdService {
 		// return vIdGenerator.getNext().getVid();
 		Map<String, VId> map = new HashMap<>();
 		try {
+
+			VIdUtility.validateDto(dto);
+
+			if (dto.getProfilesBasedOnkKey() == KeyChoice.PROFILES_WITH_KEY) {
+				vIdGenerator.checkAndLoad();
+			}
+
 			File file = new File(dto.getSaveIntoFile() + "_" + dto.getVIdCountToGenerate() + ".txt");
 			if (!file.exists()) {
 				file.createNewFile();
 			}
+
 			BufferedWriter writer = new BufferedWriter(new FileWriter(file, true));
 
 			for (int i = 0; i < Integer.valueOf(dto.getVIdCountToGenerate()); i++) {

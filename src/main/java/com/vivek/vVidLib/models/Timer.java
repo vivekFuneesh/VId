@@ -38,12 +38,14 @@ public class Timer extends CommonFields {
 
 	private int precision;
 
+	// no need for this variable in keyless profiles.
 	private int initialNumberOfSymbols;
 
 	/** Original value, unmodified, unprocessed, precised. */
 	private BigInteger precisedValue;
 
-	// this updates with increment in length of precisedValue =
+	// In case of keyBased profile, this updates with increment in length of
+	// precisedValue =
 	// (currTIme-baseTIme)/(10^precision).
 	private BigInteger baseTime;
 

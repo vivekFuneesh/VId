@@ -48,6 +48,7 @@ public class VIdState {
 
 	// private AssemblingChoice assemblingChoice;
 	private ShufflingChoice shufflingChoiceInAssembly;
+	private KeyChoice profilesBasedOnkKey;
 
 	private Map<String, Integer> reverseSymbolTableMapping;
 	private Map<Integer, String> finalSymbolTable;
