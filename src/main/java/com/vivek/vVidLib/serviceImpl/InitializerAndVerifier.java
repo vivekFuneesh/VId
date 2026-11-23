@@ -28,6 +28,7 @@
 
 package com.vivek.vVidLib.serviceImpl;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -44,6 +45,7 @@ import org.springframework.stereotype.Component;
 
 import com.vivek.vVidLib.models.CommonFields;
 import com.vivek.vVidLib.models.InitializerDto;
+import com.vivek.vVidLib.models.KeyChoice;
 import com.vivek.vVidLib.models.Randomizer;
 import com.vivek.vVidLib.models.Sequencer;
 import com.vivek.vVidLib.models.SequencerChoice;
@@ -196,6 +198,9 @@ public class InitializerAndVerifier {
 	}
 
 	public static void initializeFromDto(VId currVId, InitializerDto dto) {
+		if (dto.getProfilesBasedOnkKey() != null) {
+			currVId.setProfilesBasedOnkKey(dto.getProfilesBasedOnkKey());
+		}
 		if (dto.getShufflingChoiceInAssembly() != null)
 			currVId.setShufflingChoiceInAssembly(dto.getShufflingChoiceInAssembly());
 
@@ -229,6 +234,10 @@ public class InitializerAndVerifier {
 
 	public static VId defaultInitializeVId(VId vId) {
 
+		if (vId.getProfilesBasedOnkKey() == null) {
+			vId.setProfilesBasedOnkKey(KeyChoice.PROFILES_WITH_KEY);
+		}
+
 		defaultInitializeSequencer(vId);
 		defaultInitializeRandomizer(vId);
 		defaultInitializeTimer(vId);
@@ -239,6 +248,7 @@ public class InitializerAndVerifier {
 	}
 
 	public static void defaultVIdSettings(VId vId) {
+
 		// mix all by default
 		if (vId.getRandomizer().getToBeMixedInAssembly() == null)
 			vId.getRandomizer().setToBeMixedInAssembly(true);
@@ -260,10 +270,11 @@ public class InitializerAndVerifier {
 
 		Map<String, Integer> reverseSymbolsMapping = new HashMap<>();
 
-		Map<Integer, String> finalTable = getDefaultRandomSymbolTable(32);
+		Map<Integer, String> finalTable = getDefaultRandomSymbolTable(32, vId);
 
-		VIdUtility.shuffleSymbolStore(finalTable, ThreadLocalRandom.current());
-
+		if (vId.getProfilesBasedOnkKey() == KeyChoice.PROFILES_WITH_KEY) {
+			VIdUtility.shuffleSymbolStore(finalTable, ThreadLocalRandom.current());
+		}
 		finalTable.entrySet().stream().forEach(entry -> {
 			reverseSymbolsMapping.put(entry.getValue(), entry.getKey());
 		});
@@ -293,7 +304,7 @@ public class InitializerAndVerifier {
 			seq.setSeqC(SequencerChoice.SLOW);
 		seq.setInitialNumberOfSymbols(1);
 
-		setDefaultCommonFields(seq);
+		setDefaultCommonFields(seq, vId);
 
 		if (vId.getSequencer().getShufflingChoice() == ShufflingChoice.RANDOM_PLACE_MAPPINGS)
 			defaultInternalPlaceMappings(seq, seq.getInitialNumberOfSymbols());
@@ -307,7 +318,7 @@ public class InitializerAndVerifier {
 		if (ran.getIdentitySymbol() == null) {
 			ran.setIdentitySymbol("R");
 		}
-		setDefaultCommonFields(ran);
+		setDefaultCommonFields(ran, vId);
 		if (vId.getRandomizer().getShufflingChoice() == ShufflingChoice.RANDOM_PLACE_MAPPINGS)
 			defaultInternalPlaceMappings(ran, ran.getCurrentNumberOfSymbols());
 
@@ -322,26 +333,39 @@ public class InitializerAndVerifier {
 		if (timer.getIdentitySymbol() == null) {
 			timer.setIdentitySymbol("T");
 		}
-		setDefaultCommonFields(timer);
+		setDefaultCommonFields(timer, vId);
 
 		timer.setPrecision(1);
 
-		timer.setInitialNumberOfSymbols(1);
+		if (vId.getProfilesBasedOnkKey() == KeyChoice.PROFILES_WITH_KEY) {
+			// if key saving enabled and it's first time, so start timed-counter from 0
+			timer.setInitialNumberOfSymbols(1);
+			// not setting baseTime here as it will be set in generator upon finding
+			// precisedValue as null.
+			timer.setPrecisedValue(null);
 
-		timer.setPrecisedValue(null);
-		// not setting baseTime here as it will be set in generator upon finding
-		// precisedValue as null.
-		// timer.setBaseTime(BigInteger.valueOf(Instant.now().toEpochMilli()));
-		// //BigInteger.valueOf(0));
+		} else {
+			// change base time to any hardcoded value according to need, once
+			// initialized- must not be changed later for keyless profiles.
+			timer.setBaseTime(BigInteger.valueOf(1795449100000l));// 0
+
+		}
 
 		SynchronizingObject synchronizingObject = new SynchronizingObject();
 		synchronizingObject.setId("default-ID");
 		timer.setSynchronizingObject(synchronizingObject);
 	}
 
-	public static void setDefaultCommonFields(CommonFields part) {
+	public static void setDefaultCommonFields(CommonFields part, VId vId) {
 
-		part.setSymbolTable(getDefaultRandomSymbolTable(32));
+		part.setSymbolTable(getDefaultRandomSymbolTable(32, vId));
+
+		// can shuffle non timer symbol stores even in keyless profiles
+		// as timer's precised value increments upon restart, hence others
+		// can be shuffled
+		if (part != vId.getTimer()) {
+			VIdUtility.shuffleSymbolStore(part.getSymbolTable(), ThreadLocalRandom.current());
+		}
 
 		part.setFirstBase(part.getSymbolTable().size());
 
@@ -423,12 +447,13 @@ public class InitializerAndVerifier {
 		return set;
 	}
 
-	public static Map<Integer, String> getDefaultRandomSymbolTable(int defaultLength) {
+	public static Map<Integer, String> getDefaultRandomSymbolTable(int defaultLength, VId vId) {
 		Map<Integer, String> symbolTable = new HashMap<>();
 		List<Character> defaultSymbols = new ArrayList<>(getDefaultSymbols());
 
-		Collections.shuffle(defaultSymbols, ThreadLocalRandom.current());
-
+		if (vId.getProfilesBasedOnkKey() == KeyChoice.PROFILES_WITH_KEY) {
+			Collections.shuffle(defaultSymbols, ThreadLocalRandom.current());
+		}
 		for (int i = 0; i < defaultLength; i++) {
 			symbolTable.put(i, "" + defaultSymbols.get(i));
 		}
@@ -438,7 +463,7 @@ public class InitializerAndVerifier {
 
 	public static void main(String[] str) {
 		System.out.println(getDefaultSymbols().size());
-		long tableSize = getDefaultRandomSymbolTable(32).entrySet().stream().count();
+		long tableSize = getDefaultRandomSymbolTable(32, new VId()).entrySet().stream().count();
 		System.out.println(tableSize);
 	}
 

@@ -59,6 +59,7 @@ public class Assembler {
 //				+ " Sequencer: "+ vId.getSequencer().getValue());
 
 		remapAllPartsValuesToVIdSymbolTable(vId, parts);
+		// mixAll(vId);
 		mixAndAssemble(vId, parts);
 		/*switch (vId.getAssemblingChoice()) {
 		case NO_MIXING:
@@ -360,7 +361,7 @@ public class Assembler {
 			});
 			return result;
 		}
-	
+	/*
 	//	// t-s-r
 	//	private void noMixing(VId vId, List<CommonFields> parts) {
 	//

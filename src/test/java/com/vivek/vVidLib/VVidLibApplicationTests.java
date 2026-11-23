@@ -30,6 +30,7 @@ package com.vivek.vVidLib;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.Order;
@@ -41,6 +42,7 @@ import org.springframework.context.ApplicationContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vivek.vVidLib.models.InitializerDto;
+import com.vivek.vVidLib.models.KeyChoice;
 import com.vivek.vVidLib.models.SequencerChoice;
 import com.vivek.vVidLib.models.ShufflingChoice;
 import com.vivek.vVidLib.repository.VIdStateRepo;
@@ -88,6 +90,9 @@ class VVidLibApplicationTests {
 
 		// P
 		dto.setShufflingChoiceInAssembly(ShufflingChoice.RANDOM_PLACE_MAPPINGS);
+
+		// keyChoice
+		dto.setProfilesBasedOnkKey(KeyChoice.PROFILES_WITH_KEY);
 	}
 
 	@Test
@@ -342,6 +347,43 @@ class VVidLibApplicationTests {
 		dto.setVIdCountToGenerate(2000);
 		assertThat(sampleService.getVId(dto, context, om)).isNotNull();
 		Uniqueness_Check_Program.main(new String[] { "MaxLenT-FP2P_2000.txt" });
+	}
+
+	@Test
+	@Order(18)
+	void testSF2Fi_KeyLess_Configuration() {
+
+		dto.setProfilesBasedOnkKey(KeyChoice.PROFILES_WITHOUT_KEY);
+		dto.setSequencerChoice(SequencerChoice.SLOW);
+		dto.setShufflingChoiceInAssembly(ShufflingChoice.FIXED_POSITIONS);
+
+		dto.setSaveIntoFile("SF2Fi_KeyLess_Configuration");
+		dto.setVIdCountToGenerate(2000);
+
+		assertThat(sampleService.getVId(dto, context, om)).isNotNull();
+		Uniqueness_Check_Program
+				.main(new String[] { dto.getSaveIntoFile() + "_" + dto.getVIdCountToGenerate() + ".txt" });
+	}
+
+	@Test
+	@Order(19)
+	void testSF2Fi_2Nd_Call_KeyLess_Configuration() {
+		SoftAssertions softAssert = new SoftAssertions();
+
+		dto.setProfilesBasedOnkKey(KeyChoice.PROFILES_WITHOUT_KEY);
+		dto.setSequencerChoice(SequencerChoice.SLOW);
+		dto.setShufflingChoiceInAssembly(ShufflingChoice.FIXED_POSITIONS);
+
+		// dto.setTimerShufflingChoice(ShufflingChoice.RANDOM_PLACE_MAPPINGS);
+
+		dto.setSaveIntoFile("SF2Fi_KeyLess_Configuration");
+		dto.setVIdCountToGenerate(2000);
+		for (int i = 0; i < 10; i++) {
+			assertThat(sampleService.getVId(dto, context, om)).isNotNull().as("in batch " + i);
+		}
+		softAssert.assertAll();
+		Uniqueness_Check_Program
+				.main(new String[] { dto.getSaveIntoFile() + "_" + dto.getVIdCountToGenerate() + ".txt" });
 	}
 
 }

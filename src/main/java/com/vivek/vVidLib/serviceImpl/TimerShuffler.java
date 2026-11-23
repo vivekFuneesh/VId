@@ -48,12 +48,12 @@ public class TimerShuffler implements Shuffler {
 
 		Timer timer = timerz.getTimer();
 
-		char[] shuffledSequencer = new char[timer.getValueInBits().length()];
+		char[] shuffledimer = new char[timer.getValueInBits().length()];
 
-		shuffledSequencer = shuffleMe(timer.getShufflingChoice(), timer.getBitsInternalPlaceMappings(),
-				timer.getValueInBits(), shuffledSequencer);
+		shuffledimer = shuffleMe(timer.getShufflingChoice(), timer.getBitsInternalPlaceMappings(),
+				timer.getValueInBits(), shuffledimer);
 
-		timer.setValueInBits(Stream.of(shuffledSequencer).map(String::valueOf).collect(Collectors.joining()));
+		timer.setValueInBits(Stream.of(shuffledimer).map(String::valueOf).collect(Collectors.joining()));
 
 	}
 

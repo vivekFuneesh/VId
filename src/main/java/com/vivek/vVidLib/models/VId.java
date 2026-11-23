@@ -54,6 +54,8 @@ public class VId {
 
 	private ShufflingChoice shufflingChoiceInAssembly;
 
+	private KeyChoice profilesBasedOnkKey;
+
 	private Timer timer;
 
 	private Sequencer sequencer;
