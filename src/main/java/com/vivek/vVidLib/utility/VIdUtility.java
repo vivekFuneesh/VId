@@ -46,6 +46,7 @@ import java.util.stream.IntStream;
 import com.vivek.vVidLib.models.CommonFields;
 import com.vivek.vVidLib.models.InitializerDto;
 import com.vivek.vVidLib.models.KeyChoice;
+import com.vivek.vVidLib.models.SequencerChoice;
 import com.vivek.vVidLib.models.ShufflingChoice;
 import com.vivek.vVidLib.models.VId;
 
@@ -387,7 +388,8 @@ public class VIdUtility {
 		}
 		if (dto.getProfilesBasedOnkKey() == KeyChoice.PROFILES_WITHOUT_KEY) {
 			if (dto.getShufflingChoiceInAssembly() != ShufflingChoice.FIXED_POSITIONS
-					|| dto.getTimerShufflingChoice() != ShufflingChoice.FIXED_POSITIONS) {
+					|| dto.getTimerShufflingChoice() != ShufflingChoice.FIXED_POSITIONS ||
+					dto.getSequencerChoice() == SequencerChoice.FAST) {
 
 				throw new RuntimeException("Incorrect KeyLess Profile Configuration");
 

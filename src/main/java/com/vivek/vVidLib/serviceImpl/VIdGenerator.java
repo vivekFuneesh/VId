@@ -149,7 +149,7 @@ public class VIdGenerator {
 	@Autowired(required = false)
 	VIdStateRepo vIdStateRepo;
 
-	@Autowired
+	@Autowired(required = false)
 	MongoClient client;
 
 	ModelMapper mm = new ModelMapper();
@@ -373,28 +373,38 @@ public class VIdGenerator {
 					part.setBitsInternalPlaceMappings(null);
 				}
 			});*/
-			System.out.println("CurrVId state is: \n" + currVId);
+//			System.out.println("CurrVId state is: \n" + currVId);
 		}
 
 		// AdjustAndUpdate (if temp is not null)
 		if (oldVId != null) {
 			// System.out.println(" sync Object= "+
 			// currVId.getTimer().getSynchronizingObject());
-			serviceCaller.getAdjustorAndUpdator().process(serviceCaller, currVId, oldVId, parts);
+			adjustAndUpdate(serviceCaller, currVId, oldVId, parts);
 		}
 
 		// Shuffle
 		shuffle(currVId, parts);
 
 		// Assemble
-		serviceCaller.getAssembler().assemble(currVId, parts);
-
+		assemble(currVId, parts);
+		
 		// compile from bits to symbol-mapped-value.
 		VIdUtility.mapBitsWithSecondBaseToSymbols(currVId);
 
 		return currVId;
 	}
 
+	private void adjustAndUpdate(ServiceCaller serviceCaller2, VId currVId, VId oldVId, List<CommonFields> parts) {
+		serviceCaller.getAdjustorAndUpdator().process(serviceCaller, currVId, oldVId, parts);
+		
+	}
+
+	private void assemble(VId currVId, List<CommonFields> parts) {
+		
+		serviceCaller.getAssembler().assemble(currVId, parts);
+	}
+	
 	private void shuffle(VId vId, List<CommonFields> parts) {
 
 		AtomicInteger index = new AtomicInteger(0);

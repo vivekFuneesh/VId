@@ -58,7 +58,7 @@ class VVidLibApplicationTests {
 
 	InitializerDto dto;
 
-	@Autowired
+	@Autowired(required = false)
 	VIdStateRepo repo;
 
 	@Autowired
