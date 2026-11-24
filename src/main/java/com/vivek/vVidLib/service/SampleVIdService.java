@@ -46,7 +46,7 @@ public interface SampleVIdService {
 	default String getVId(@Valid InitializerDto dto, ApplicationContext context, ObjectMapper objectMapper) {
 		System.out.println("received dto =" + dto.getVIdCountToGenerate());
 		VIdGenerator vIdGenerator = context.getBean(VIdGenerator.class);
-		vIdGenerator = context.getBean(VIdGenerator.class);
+//		vIdGenerator = context.getBean(VIdGenerator.class);
 		System.out
 				.println("Prepopulated db-calls in generation-process is : " + vIdGenerator.getNumberOfDatabaseCalls());
 		// return vIdGenerator.getNext().getVid();

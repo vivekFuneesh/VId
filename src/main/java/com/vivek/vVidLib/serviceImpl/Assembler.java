@@ -29,6 +29,7 @@
 package com.vivek.vVidLib.serviceImpl;
 
 import java.math.BigInteger;
+import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -290,11 +291,11 @@ public class Assembler {
 
 			result = Stream
 					.concat(allParts.stream().filter(part -> !part.getToBeMixedInAssembly())
-							.map(part -> List.of(part.getRemappedValueInBitsToVIdSymbolTableInAssembly(),
+							.map(part -> new SimpleImmutableEntry<>(
+									part.getRemappedValueInBitsToVIdSymbolTableInAssembly(),
 									vId.getAssemblingOrder().get(part.getIdentitySymbol()).intValue())),
-							Stream.of(List.of(result, lowestOrderInMixed.get())))
-					.sorted((a, b) -> (Integer) a.get(1) - (Integer) b.get(1)).map(x -> (String) x.get(0))
-					.collect(Collectors.joining());
+							Stream.of(new SimpleImmutableEntry<>(result, lowestOrderInMixed.get())))
+					.sorted((a, b) -> a.getValue() - b.getValue()).map(x -> x.getKey()).collect(Collectors.joining());
 
 			break;
 
