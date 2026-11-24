@@ -388,8 +388,8 @@ public class VIdUtility {
 		}
 		if (dto.getProfilesBasedOnkKey() == KeyChoice.PROFILES_WITHOUT_KEY) {
 			if (dto.getShufflingChoiceInAssembly() != ShufflingChoice.FIXED_POSITIONS
-					|| dto.getTimerShufflingChoice() != ShufflingChoice.FIXED_POSITIONS ||
-					dto.getSequencerChoice() == SequencerChoice.FAST) {
+					|| dto.getTimerShufflingChoice() != ShufflingChoice.FIXED_POSITIONS
+					|| dto.getSequencerChoice() == SequencerChoice.FAST) {
 
 				throw new RuntimeException("Incorrect KeyLess Profile Configuration");
 

@@ -179,7 +179,12 @@ public class VIdGenerator {
 			currentVId.setTimer(mm.map(state.getTimerState(), Timer.class));
 			currentVId.setSequencer(mm.map(state.getSequencerState(), Sequencer.class));
 			currentVId.setRandomizer(mm.map(state.getRandomizerState(), Randomizer.class));
-//			System.out.println("loaded assembling order is = "+ currentVId.getAssemblingOrder()+
+
+			VIdUtility.validate(currentVId,
+					Arrays.asList(currentVId.getTimer(), currentVId.getSequencer(), currentVId.getRandomizer()));
+
+			// System.out.println("loaded assembling order is = "+
+			// currentVId.getAssemblingOrder()+
 //					"\ntimer ="+currentVId.getTimer().getIdentitySymbol()+
 //					"\nsequencer="+currentVId.getSequencer().getIdentitySymbol()+
 //					"\nrandomizer="+currentVId.getRandomizer().getIdentitySymbol());
@@ -276,6 +281,10 @@ public class VIdGenerator {
 
 			currVId = InitializerAndVerifier.defaultInitializeVId(currVId);
 
+			parts = Arrays.asList(currVId.getTimer(), currVId.getSequencer(), currVId.getRandomizer());
+
+			VIdUtility.validate(currVId, parts);
+
 			System.out.println("\n dto's shufll choice in assembly = " + dto.getShufflingChoiceInAssembly() + "\n");
 
 			System.out.println(currVId.getAssemblingOrder());
@@ -286,13 +295,9 @@ public class VIdGenerator {
 		} else {
 			// copy oldVId to temp (to act like old) and rename oldVId to currVId
 			currVId = objectMapper.convertValue(oldVId, VId.class);
+			parts = Arrays.asList(currVId.getTimer(), currVId.getSequencer(), currVId.getRandomizer());
 
 		}
-
-		parts = Arrays.asList(currVId.getTimer(), currVId.getSequencer(), currVId.getRandomizer());
-
-		// todo: irrelevant condition check per generation.
-		VIdUtility.validate(currVId, parts);
 
 		// Generate
 		generate(currVId, parts);
@@ -388,7 +393,7 @@ public class VIdGenerator {
 
 		// Assemble
 		assemble(currVId, parts);
-		
+
 		// compile from bits to symbol-mapped-value.
 		VIdUtility.mapBitsWithSecondBaseToSymbols(currVId);
 
@@ -397,14 +402,14 @@ public class VIdGenerator {
 
 	private void adjustAndUpdate(ServiceCaller serviceCaller2, VId currVId, VId oldVId, List<CommonFields> parts) {
 		serviceCaller.getAdjustorAndUpdator().process(serviceCaller, currVId, oldVId, parts);
-		
+
 	}
 
 	private void assemble(VId currVId, List<CommonFields> parts) {
-		
+
 		serviceCaller.getAssembler().assemble(currVId, parts);
 	}
-	
+
 	private void shuffle(VId vId, List<CommonFields> parts) {
 
 		AtomicInteger index = new AtomicInteger(0);

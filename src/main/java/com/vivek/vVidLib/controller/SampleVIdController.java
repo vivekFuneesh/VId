@@ -26,6 +26,7 @@ import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -37,6 +38,7 @@ import com.vivek.vVidLib.service.SampleVIdService;
 
 @RestController
 @RequestMapping("")
+@Validated
 public class SampleVIdController {
 	@Autowired
 	ApplicationContext context;
