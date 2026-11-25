@@ -165,6 +165,10 @@ public class VIdGenerator {
 	}
 
 	public void checkAndLoad() {
+		if(currentVId!=null)
+		{
+			return;
+		}
 		System.out.println("Inside checkAndLoad");
 		state = vIdStateRepo.findAll().stream().findFirst().orElse(null);
 
